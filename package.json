@@ -1,0 +1,94 @@
+{
+  "name": "pyodide-worker-runner",
+  "version": "0.0.1",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alexmojaki/pyodide-worker-runner.git"
+  },
+  "license": "MIT",
+  "author": "Alex Hall <alex.mojaki@gmail.com>",
+  "sideEffects": false,
+  "main": "dist/index.js",
+  "types": "dist/lib/index.d.ts",
+  "module": "lib/",
+  "files": [
+    "dist/",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "rm -rf dist/ && webpack --mode production",
+    "format": "prettier --write '**/*.*' && eslint . --fix",
+    "lint": "prettier --check '**/*.*' && eslint .",
+    "prepare": "yarn build"
+  },
+  "babel": {
+    "presets": [
+      [
+        "@babel/preset-env",
+        {
+          "targets": {
+            "node": "12"
+          }
+        }
+      ]
+    ]
+  },
+  "prettier": {
+    "bracketSpacing": false,
+    "trailingComma": "all"
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "es6": true,
+      "node": true
+    },
+    "parser": "babel-eslint",
+    "parserOptions": {
+      "ecmaVersion": 2019,
+      "sourceType": "module"
+    },
+    "extends": [
+      "eslint:recommended"
+    ],
+    "rules": {
+      "no-constant-condition": [
+        2,
+        {
+          "checkLoops": false
+        }
+      ]
+    },
+    "globals": {
+      "Atomics": "readonly",
+      "SharedArrayBuffer": "readonly"
+    }
+  },
+  "peerDependencies": {},
+  "devDependencies": {
+    "@babel/cli": "7.12.17",
+    "@babel/core": "7.12.17",
+    "@babel/preset-env": "7.12.17",
+    "babel-eslint": "10.1.0",
+    "comlink": "^4.3.1",
+    "eslint": "7.32.0",
+    "html-webpack-plugin": "^5.5.0",
+    "prettier": "2.1.2",
+    "prettier-plugin-packagejson": "2.2.13",
+    "raw-loader": "^4.0.2",
+    "sync-message": "^0.0.9",
+    "ts-loader": "^9.2.6",
+    "typescript": "^4.5.5",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.66.0",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.7.3",
+    "worker-loader": "^3.0.8"
+  },
+  "dependencies": {
+    "comsync": "^0.0.2",
+    "p-retry": "^5.0.0"
+  }
+}
