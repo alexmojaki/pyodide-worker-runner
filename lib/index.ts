@@ -1,7 +1,7 @@
-import {ServiceWorkerError} from "sync-message";
 import pRetry from 'p-retry';
-import {exposeSync, ExposeSyncExtras, InterruptError, NoChannelError, TaskClient} from "comsync";
+import {exposeSync, ExposeSyncExtras, TaskClient} from "comsync";
 import * as Comlink from 'comlink';
+
 const pyodide_worker_runner_contents = require("!!raw-loader!./pyodide_worker_runner.py").default;
 
 declare interface Pyodide {
@@ -80,11 +80,11 @@ export function makeRunnerCallback(comsyncExtras: ExposeSyncExtras, callbacks: a
       try {
         return comsyncExtras.readMessage() + "\n";
       } catch (e) {
-        if (e instanceof InterruptError) {
+        if (e.type === "InterruptError") {
           return 1;  // raise KeyboardInterrupt
-        } else if (e instanceof ServiceWorkerError) {
+        } else if (e.type === "ServiceWorkerError") {
           return 2;  // suggesting closing all tabs and reopening
-        } else if (e instanceof NoChannelError) {
+        } else if (e.type === "NoChannelError") {
           return 3;  // browser not supported
         }
         throw e;
