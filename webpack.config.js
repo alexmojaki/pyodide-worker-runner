@@ -22,6 +22,7 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.js', '.d.ts'],
   },
+  devtool: 'source-map',
   externals: {
     comlink: 'comlink',
     'sync-message': 'sync-message',
