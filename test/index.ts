@@ -39,10 +39,15 @@ async function runTests() {
   let output = "";
   let prompt = "";
 
-  function runTask(...args: any[]) {
+  function runCode(code: string) {
     prompt = "none";
     output = "";
-    resultPromise = client.call(client.workerProxy.test, ...args);
+    resultPromise = client.call(
+      client.workerProxy.test,
+      code,
+      Comlink.proxy(inputCallback),
+      Comlink.proxy(outputCallback),
+    );
   }
 
   async function expect(expected: any) {
@@ -75,11 +80,7 @@ async function runTests() {
     client.channel = channel;
 
     let test = "test_print";
-    runTask(
-      "print(123)",
-      Comlink.proxy(inputCallback),
-      Comlink.proxy(outputCallback),
-    );
+    runCode("print(123)");
 
     await expect({
       result: "success",
@@ -88,11 +89,7 @@ async function runTests() {
     });
 
     test = "test_input";
-    runTask(
-      "print(int(input('hi')))",
-      Comlink.proxy(inputCallback),
-      Comlink.proxy(outputCallback),
-    );
+    runCode("print(int(input('hi')))");
     await asyncSleep(100);
     await client.writeMessage("456");
     await expect({
@@ -104,7 +101,7 @@ async function runTests() {
     });
 
     test = "test_interrupt_input";
-    runTask(
+    runCode(
       `
 try:
   input('interrupt me')
@@ -113,8 +110,6 @@ except BaseException as e:
 else:
   print('not!')
 `,
-      Comlink.proxy(inputCallback),
-      Comlink.proxy(outputCallback),
     );
     await asyncSleep(100);
     await client.interrupt();
@@ -126,7 +121,7 @@ else:
     });
 
     test = "test_sleep";
-    runTask(
+    runCode(
       `
 import time
 start = time.time()
@@ -134,8 +129,6 @@ time.sleep(1)
 end = time.time()
 print(1 < end - start < 1.5)
 `,
-      Comlink.proxy(inputCallback),
-      Comlink.proxy(outputCallback),
     );
     await expect({
       result: "success",
@@ -144,7 +137,7 @@ print(1 < end - start < 1.5)
     });
 
     test = "test_interrupt_sleep";
-    runTask(
+    runCode(
       `
 import time
 start = time.time()
@@ -157,8 +150,6 @@ else:
 end = time.time()
 print(end - start < 0.5)
 `,
-      Comlink.proxy(inputCallback),
-      Comlink.proxy(outputCallback),
     );
     await asyncSleep(100);
     await client.interrupt();
@@ -173,7 +164,7 @@ True
 
   test = "test_no_channel";
   client.channel = null;
-  runTask(
+  runCode(
     `
 try:
   input('no channel')
@@ -182,12 +173,10 @@ except BaseException as e:
 else:
   print('not!')
 `,
-    null,
-    Comlink.proxy(outputCallback),
   );
   await expect({
     result: "success",
-    prompt: "none",
+    prompt: "no channel",
     output:
       "input_prompt:no channel;" +
       "stdout:This browser doesn't support reading input. " +
@@ -197,7 +186,7 @@ else:
 
   test = "test_service_worker_error";
   client.channel = {...serviceWorkerChannel, baseUrl: window.location.href};
-  runTask(
+  runCode(
     `
 try:
   input('no service worker')
@@ -206,12 +195,10 @@ except BaseException as e:
 else:
   print('not!')
 `,
-    null,
-    Comlink.proxy(outputCallback),
   );
   await expect({
     result: "success",
-    prompt: "none",
+    prompt: "no service worker",
     output:
       "input_prompt:no service worker;" +
       "stdout:The service worker for reading input isn't working. " +
@@ -222,7 +209,7 @@ else:
 
   if (hasSAB) {
     test = "test_interrupt";
-    runTask(
+    runCode(
       `
 try:
   while True:
@@ -232,8 +219,6 @@ except BaseException as e:
 else:
   print('not!')
 `,
-      null,
-      Comlink.proxy(outputCallback),
     );
     await asyncSleep(100);
     await client.interrupt();
