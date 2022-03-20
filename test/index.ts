@@ -37,15 +37,17 @@ async function runTests() {
   let channelType = "";
   let resultPromise: Promise<any>;
   let output = "";
-  let prompt = "";
+  let prompt: string | undefined;
+  let expectedPrompt: string | undefined;
 
-  function runCode(code: string) {
-    prompt = "none";
+  function runCode(code: string, exPrompt?: string) {
+    expectedPrompt = exPrompt;
+    prompt = undefined;
     output = "";
     resultPromise = client.call(
       client.workerProxy.test,
       code,
-      Comlink.proxy(inputCallback),
+      exPrompt ? Comlink.proxy(inputCallback) : null,
       Comlink.proxy(outputCallback),
     );
   }
@@ -54,7 +56,11 @@ async function runTests() {
     const result = await resultPromise;
     await asyncSleep(100);
     const actual = {result, output, prompt};
-    const passed = isEqual(actual, {...expected, result: "success"});
+    const passed = isEqual(actual, {
+      ...expected,
+      result: "success",
+      prompt: expectedPrompt,
+    });
     console.log(output);
     testResults.push({
       test,
@@ -83,16 +89,14 @@ async function runTests() {
     runCode("print(123)");
 
     await expect({
-      prompt: "none",
       output: "stdout:123\n;",
     });
 
     test = "test_input";
-    runCode("print(int(input('hi')))");
+    runCode("print(int(input('hi')))", "hi");
     await asyncSleep(100);
     await client.writeMessage("456");
     await expect({
-      prompt: "hi",
       output: `input_prompt:hi;input:456
 ;stdout:456;stdout:
 ;`,
@@ -108,11 +112,11 @@ except BaseException as e:
 else:
   print('not!')
 `,
+      "interrupt me",
     );
     await asyncSleep(100);
     await client.interrupt();
     await expect({
-      prompt: "interrupt me",
       output: `input_prompt:interrupt me;stdout:KeyboardInterrupt
 ;`,
     });
@@ -128,7 +132,6 @@ print(1 < end - start < 1.5)
 `,
     );
     await expect({
-      prompt: "none",
       output: "stdout:True;stdout:\n;",
     });
 
@@ -150,7 +153,6 @@ print(end - start < 0.5)
     await asyncSleep(100);
     await client.interrupt();
     await expect({
-      prompt: "none",
       output: `stdout:KeyboardInterrupt
 True
 ;`,
@@ -168,9 +170,9 @@ except BaseException as e:
 else:
   print('not!')
 `,
+    "no channel",
   );
   await expect({
-    prompt: "no channel",
     output:
       "input_prompt:no channel;" +
       "stdout:This browser doesn't support reading input. " +
@@ -189,9 +191,9 @@ except BaseException as e:
 else:
   print('not!')
 `,
+    "no service worker",
   );
   await expect({
-    prompt: "no service worker",
     output:
       "input_prompt:no service worker;" +
       "stdout:The service worker for reading input isn't working. " +
@@ -216,7 +218,6 @@ else:
     await asyncSleep(100);
     await client.interrupt();
     await expect({
-      prompt: "none",
       output: "stdout:KeyboardInterrupt\n;",
     });
   }
