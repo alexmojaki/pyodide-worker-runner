@@ -10,4 +10,4 @@
 !*.tsx
 !*.yml
 /coverage/
-/dist/
+dist/

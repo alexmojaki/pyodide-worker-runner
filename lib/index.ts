@@ -17,14 +17,32 @@ declare interface Pyodide {
 }
 declare function loadPyodide(options: {indexURL: string}): Promise<Pyodide>;
 
-export async function loadPyodideAndPackage(packageOptions: any) {
+export type PyodideLoader = () => Promise<any>;
+export interface PackageOptions {
+  format: string;
+  url: string;
+  extract_dir?: string;
+}
+
+function defaultPyodideLoader() {
+  const indexURL = "https://cdn.jsdelivr.net/pyodide/v0.19.0/full/";
+  importScripts(indexURL + "pyodide.js");
+  return loadPyodide({indexURL});
+}
+
+export async function loadPyodideAndPackage(
+  packageOptions: PackageOptions,
+  pyodideLoader: PyodideLoader = defaultPyodideLoader,
+) {
   const {format, extract_dir, url} = packageOptions;
 
   const indexURL = "https://cdn.jsdelivr.net/pyodide/v0.19.0/full/";
   importScripts(indexURL + "pyodide.js");
 
-  const [pyodide, packageBuffer] = await Promise.all([
-    loadPyodide({indexURL}),
+  let pyodide: Pyodide;
+  let packageBuffer: ArrayBuffer;
+  [pyodide, packageBuffer] = await Promise.all([
+    pyodideLoader(),
     pRetry(() => getPackageBuffer(url), {retries: 3}),
   ]);
 
@@ -58,7 +76,9 @@ function initPyodide(pyodide: Pyodide) {
 async function getPackageBuffer(url: string) {
   const response = await fetch(url);
   if (!response.ok) {
-    throw new Error(`Request for package failed with status ${response.status}: ${response.statusText}`);
+    throw new Error(
+      `Request for package failed with status ${response.status}: ${response.statusText}`,
+    );
   }
   return await response.arrayBuffer();
 }

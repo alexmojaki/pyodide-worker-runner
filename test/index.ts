@@ -62,7 +62,7 @@ async function runTests() {
 
   function outputCallback(parts: any[]) {
     for (const part of parts) {
-      output += `${part.type}:${part.text};`
+      output += `${part.type}:${part.text};`;
     }
   }
 
@@ -98,15 +98,14 @@ async function runTests() {
     await expect({
       result: "success",
       prompt: "hi",
-      output: "input_prompt:hi;" +
-        "input:456\n;" +
-        "stdout:456;" +
-        "stdout:\n;",
+      output: `input_prompt:hi;input:456
+;stdout:456;stdout:
+;`,
     });
 
     test = "test_interrupt_input";
     runTask(
-`
+      `
 try:
   input('interrupt me')
 except BaseException as e:
@@ -122,8 +121,8 @@ else:
     await expect({
       result: "success",
       prompt: "interrupt me",
-      output: "input_prompt:interrupt me;" +
-        "stdout:KeyboardInterrupt\n;",
+      output: `input_prompt:interrupt me;stdout:KeyboardInterrupt
+;`,
     });
 
     test = "test_sleep";
@@ -166,9 +165,9 @@ print(end - start < 0.5)
     await expect({
       result: "success",
       prompt: "none",
-      output: "stdout:KeyboardInterrupt\n" +
-        "True\n" +
-        ";",
+      output: `stdout:KeyboardInterrupt
+True
+;`,
     });
   }
 
@@ -189,7 +188,8 @@ else:
   await expect({
     result: "success",
     prompt: "none",
-    output: "input_prompt:no channel;" +
+    output:
+      "input_prompt:no channel;" +
       "stdout:This browser doesn't support reading input. " +
       "Try upgrading to the most recent version or switching to a different browser, " +
       "e.g. Chrome or Firefox.\n;",
@@ -212,7 +212,8 @@ else:
   await expect({
     result: "success",
     prompt: "none",
-    output: "input_prompt:no service worker;" +
+    output:
+      "input_prompt:no service worker;" +
       "stdout:The service worker for reading input isn't working. " +
       "Try closing all this site's tabs, then reopening. " +
       "If that doesn't work, try using a different browser.;" +
