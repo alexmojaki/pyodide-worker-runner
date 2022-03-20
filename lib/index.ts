@@ -13,11 +13,11 @@ declare interface Pyodide {
   ) => void;
   pyimport: (name: string) => any;
   registerComlink: any;
-  setInterruptBuffer: any;
+  setInterruptBuffer: (buffer: Int32Array) => void;
 }
 declare function loadPyodide(options: {indexURL: string}): Promise<Pyodide>;
 
-export type PyodideLoader = () => Promise<any>;
+export type PyodideLoader = () => Promise<Pyodide>;
 export interface PackageOptions {
   format: string;
   url: string;
@@ -35,9 +35,6 @@ export async function loadPyodideAndPackage(
   pyodideLoader: PyodideLoader = defaultPyodideLoader,
 ) {
   const {format, extract_dir, url} = packageOptions;
-
-  const indexURL = "https://cdn.jsdelivr.net/pyodide/v0.19.0/full/";
-  importScripts(indexURL + "pyodide.js");
 
   let pyodide: Pyodide;
   let packageBuffer: ArrayBuffer;
@@ -58,7 +55,7 @@ export async function loadPyodideAndPackage(
   return pyodide;
 }
 
-function initPyodide(pyodide: Pyodide) {
+export function initPyodide(pyodide: Pyodide) {
   pyodide.registerComlink(Comlink);
 
   const sys = pyodide.pyimport("sys");
@@ -83,39 +80,49 @@ async function getPackageBuffer(url: string) {
   return await response.arrayBuffer();
 }
 
-export function toObject(x: any): any {
-  if (x?.toJs) {
-    x = x.toJs();
-  }
-  if (x instanceof Map) {
-    return Object.fromEntries(
-      Array.from(x.entries(), ([k, v]) => [k, toObject(v)]),
-    );
-  } else if (x instanceof Array) {
-    return x.map(toObject);
-  } else {
-    return x;
-  }
+export interface OutputPart {
+  type: string;
+  text: string;
+  [key: string]: unknown;
 }
 
-export function makeRunnerCallback(comsyncExtras: SyncExtras, callbacks: any) {
+export interface RunnerCallbacks {
+  input?: (prompt: string) => string;
+  output: (parts: OutputPart[]) => unknown;
+  [key: string]: (data: unknown) => unknown;
+}
+
+export function makeRunnerCallback(
+  comsyncExtras: SyncExtras,
+  callbacks: RunnerCallbacks,
+) {
   return function (type: string, data: any) {
-    data = toObject(data);
+    if (data.toJs) {
+      data = data.toJs({dict_converter: Object.fromEntries});
+    }
+
     if (type === "input") {
       callbacks.input && callbacks.input(data.prompt);
       return comsyncExtras.readMessage() + "\n";
     } else if (type === "sleep") {
       comsyncExtras.syncSleep(data.seconds * 1000);
     } else if (type === "output") {
-      callbacks.output(data.parts);
+      return callbacks.output(data.parts);
     } else {
-      callbacks[type](data);
+      return callbacks[type](data);
     }
   };
 }
 
-export function pyodideExpose(pyodidePromise: Promise<Pyodide>, func: any) {
-  return syncExpose(async function (comsyncExtras, interruptBuffer, ...args) {
+export function pyodideExpose<T extends any[], R>(
+  pyodidePromise: Promise<Pyodide>,
+  func: (extras: SyncExtras, pyodide: Pyodide, ...args: T) => R,
+) {
+  return syncExpose(async function (
+    comsyncExtras: SyncExtras,
+    interruptBuffer: Int32Array | null,
+    ...args: T
+  ): Promise<R> {
     const pyodide = await pyodidePromise;
 
     if (interruptBuffer) {
@@ -127,8 +134,8 @@ export function pyodideExpose(pyodidePromise: Promise<Pyodide>, func: any) {
 }
 
 export class PyodideClient<T> extends SyncClient<T> {
-  async runTask(proxyMethod: any, ...args: any[]) {
-    let interruptBuffer = null;
+  async call(proxyMethod: any, ...args: any[]) {
+    let interruptBuffer: Int32Array | null = null;
     if (typeof SharedArrayBuffer !== "undefined") {
       interruptBuffer = new Int32Array(
         new SharedArrayBuffer(Int32Array.BYTES_PER_ELEMENT * 1),

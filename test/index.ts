@@ -6,7 +6,7 @@ import {
   ServiceWorkerError,
   writeMessage,
 } from "sync-message";
-import {PyodideClient} from "../lib";
+import {OutputPart, PyodideClient} from "../lib";
 import * as Comlink from "comlink";
 import {isEqual} from "lodash";
 
@@ -42,7 +42,7 @@ async function runTests() {
   function runTask(...args: any[]) {
     prompt = "none";
     output = "";
-    resultPromise = client.runTask(client.workerProxy.test, ...args);
+    resultPromise = client.call(client.workerProxy.test, ...args);
   }
 
   async function expect(expected: any) {
@@ -60,7 +60,7 @@ async function runTests() {
     });
   }
 
-  function outputCallback(parts: any[]) {
+  function outputCallback(parts: OutputPart[]) {
     for (const part of parts) {
       output += `${part.type}:${part.text};`;
     }
