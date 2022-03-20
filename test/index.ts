@@ -169,8 +169,7 @@ else:
   });
 
   test = "test_service_worker_error";
-  client.channel = serviceWorkerChannel;
-  serviceWorkerChannel.baseUrl = window.location.href;
+  client.channel = {...serviceWorkerChannel, baseUrl: window.location.href};
   runTask(
     `
 try:
@@ -192,6 +191,30 @@ else:
       "If that doesn't work, try using a different browser.;" +
       "stdout:\n;",
   });
+
+  if (hasSAB) {
+    test = "test_interrupt";
+    runTask(
+      `
+try:
+  while True:
+    pass
+except BaseException as e:
+  print(type(e).__name__)
+else:
+  print('not!')
+`,
+      null,
+      Comlink.proxy(outputCallback),
+    );
+    await asyncSleep(100);
+    await client.interrupt();
+    await expect({
+      result: "success",
+      prompt: "none",
+      output: "stdout:KeyboardInterrupt\n;",
+    });
+  }
 
   (window as any).testResults = testResults;
   console.log(testResults);
