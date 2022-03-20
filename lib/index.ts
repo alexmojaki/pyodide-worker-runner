@@ -85,11 +85,7 @@ export function makeRunnerCallback(comsyncExtras: SyncExtras, callbacks: any) {
       callbacks.input && callbacks.input(data.prompt);
       return comsyncExtras.readMessage() + "\n";
     } else if (type === "sleep") {
-      try {
-        comsyncExtras.syncSleep(data.seconds * 1000);
-      } catch (e) {
-        console.error(e);
-      }
+      comsyncExtras.syncSleep(data.seconds * 1000);
     } else if (type === "output") {
       callbacks.output(data.parts);
     } else {

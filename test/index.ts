@@ -143,6 +143,33 @@ print(1 < end - start < 1.5)
       prompt: "none",
       output: "stdout:True;stdout:\n;",
     });
+
+    test = "test_interrupt_sleep";
+    runTask(
+      `
+import time
+start = time.time()
+try:
+  time.sleep(2)
+except BaseException as e:
+  print(type(e).__name__)
+else:
+  print('not!')
+end = time.time()
+print(end - start < 0.5)
+`,
+      Comlink.proxy(inputCallback),
+      Comlink.proxy(outputCallback),
+    );
+    await asyncSleep(100);
+    await client.interrupt();
+    await expect({
+      result: "success",
+      prompt: "none",
+      output: "stdout:KeyboardInterrupt\n" +
+        "True\n" +
+        ";",
+    });
   }
 
   test = "test_no_channel";
