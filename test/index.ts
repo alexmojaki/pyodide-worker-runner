@@ -52,15 +52,16 @@ async function runTests() {
     );
   }
 
-  async function expect(expected: any) {
+  async function expect(expectedOutput: string) {
     const result = await resultPromise;
     await asyncSleep(100);
     const actual = {result, output, prompt};
-    const passed = isEqual(actual, {
-      ...expected,
+    let expected: typeof actual = {
+      output: expectedOutput,
       result: "success",
       prompt: expectedPrompt,
-    });
+    };
+    const passed = isEqual(actual, expected);
     console.log(output);
     testResults.push({
       test,
@@ -88,19 +89,15 @@ async function runTests() {
     let test = "test_print";
     runCode("print(123)");
 
-    await expect({
-      output: "stdout:123\n;",
-    });
+    await expect("stdout:123\n;");
 
     test = "test_input";
     runCode("print(int(input('hi')))", "hi");
     await asyncSleep(100);
     await client.writeMessage("456");
-    await expect({
-      output: `input_prompt:hi;input:456
+    await expect(`input_prompt:hi;input:456
 ;stdout:456;stdout:
-;`,
-    });
+;`);
 
     test = "test_interrupt_input";
     runCode(
@@ -116,10 +113,10 @@ else:
     );
     await asyncSleep(100);
     await client.interrupt();
-    await expect({
-      output: `input_prompt:interrupt me;stdout:KeyboardInterrupt
+    await expect(
+      `input_prompt:interrupt me;stdout:KeyboardInterrupt
 ;`,
-    });
+    );
 
     test = "test_sleep";
     runCode(
@@ -131,9 +128,7 @@ end = time.time()
 print(1 < end - start < 1.5)
 `,
     );
-    await expect({
-      output: "stdout:True;stdout:\n;",
-    });
+    await expect("stdout:True;stdout:\n;");
 
     test = "test_interrupt_sleep";
     runCode(
@@ -152,11 +147,11 @@ print(end - start < 0.5)
     );
     await asyncSleep(100);
     await client.interrupt();
-    await expect({
-      output: `stdout:KeyboardInterrupt
+    await expect(
+      `stdout:KeyboardInterrupt
 True
 ;`,
-    });
+    );
   }
 
   test = "test_no_channel";
@@ -171,13 +166,12 @@ else:
   print('not!')
 `,
   );
-  await expect({
-    output:
-      "input_prompt:no channel;" +
+  await expect(
+    "input_prompt:no channel;" +
       "stdout:This browser doesn't support reading input. " +
       "Try upgrading to the most recent version or switching to a different browser, " +
       "e.g. Chrome or Firefox.\n;",
-  });
+  );
 
   test = "test_service_worker_error";
   client.channel = {...serviceWorkerChannel, baseUrl: window.location.href};
@@ -191,14 +185,13 @@ else:
   print('not!')
 `,
   );
-  await expect({
-    output:
-      "input_prompt:no service worker;" +
+  await expect(
+    "input_prompt:no service worker;" +
       "stdout:The service worker for reading input isn't working. " +
       "Try closing all this site's tabs, then reopening. " +
       "If that doesn't work, try using a different browser.;" +
       "stdout:\n;",
-  });
+  );
 
   if (hasSAB) {
     test = "test_interrupt";
@@ -215,9 +208,7 @@ else:
     );
     await asyncSleep(100);
     await client.interrupt();
-    await expect({
-      output: "stdout:KeyboardInterrupt\n;",
-    });
+    await expect("stdout:KeyboardInterrupt\n;");
   }
 
   (window as any).testResults = testResults;
