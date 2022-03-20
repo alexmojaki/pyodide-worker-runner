@@ -82,7 +82,7 @@ export function makeRunnerCallback(comsyncExtras: SyncExtras, callbacks: any) {
   return function (type: string, data: any) {
     data = toObject(data);
     if (type === "input") {
-      callbacks.input(data.prompt);
+      callbacks.input && callbacks.input(data.prompt);
       return comsyncExtras.readMessage() + "\n";
     } else if (type === "sleep") {
       try {

@@ -33,43 +33,45 @@ async function runTests() {
 
   const client = new PyodideClient(() => new Worker());
   const testResults: any[] = [];
+  let test = "";
+  let channelType = "";
+  let resultPromise: Promise<any>;
+  let output = "";
+  let prompt = "";
+
+  function runTask(...args: any[]) {
+    prompt = "none";
+    output = "";
+    resultPromise = client.runTask(client.workerProxy.test, ...args);
+  }
+
+  async function expect(expected: any) {
+    const result = await resultPromise;
+    const actual = {result, output, prompt};
+    const passed = isEqual(actual, expected);
+    console.log(output);
+    testResults.push({
+      test,
+      actual,
+      expected,
+      passed,
+      channelType,
+    });
+  }
+
+  function outputCallback(parts: any[]) {
+    for (const part of parts) {
+      output += `${part.type}:${part.text};`
+    }
+  }
+
+  function inputCallback(p: string) {
+    prompt = p;
+  }
 
   for (const channel of channels) {
-    const channelType = channel.type;
+    channelType = channel.type;
     client.channel = channel;
-    let resultPromise: Promise<any>;
-    let output = "";
-    let prompt = "";
-
-    function runTask(...args: any[]) {
-      prompt = "none";
-      output = "";
-      resultPromise = client.runTask(client.workerProxy.test, ...args);
-    }
-
-    async function expect(expected: any) {
-      const result = await resultPromise;
-      const actual = {result, output, prompt};
-      const passed = isEqual(actual, expected);
-      console.log(output);
-      testResults.push({
-        test,
-        actual,
-        expected,
-        passed,
-        channelType,
-      });
-    }
-
-    function outputCallback(parts: any[]) {
-      for (const part of parts) {
-        output += `${part.type}:${part.text};`
-      }
-    }
-
-    function inputCallback(p: string) {
-      prompt = p;
-    }
 
     let test = "test_print";
     runTask(
@@ -123,6 +125,31 @@ else:
         "stdout:KeyboardInterrupt\n;",
     });
   }
+
+  test = "test_no_channel";
+  client.channel = null;
+  runTask(
+    `
+try:
+  input('no channel')
+except BaseException as e:
+  print(type(e).__name__, e)
+else:
+  print('not!')
+`,
+    null,
+    Comlink.proxy(outputCallback),
+  );
+  await asyncSleep(100);
+  await client.interrupt();
+  await expect({
+    result: "success",
+    prompt: "none",
+    output: "input_prompt:no channel;" +
+      "stdout:RuntimeError This browser doesn't support reading input. " +
+      "Try upgrading to the most recent version or switching to a different browser, " +
+      "e.g. Chrome or Firefox.\n;",
+  });
 
   (window as any).testResults = testResults;
   console.log(testResults);
