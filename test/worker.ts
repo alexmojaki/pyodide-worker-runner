@@ -7,17 +7,25 @@ import * as Comlink from "comlink";
 import {SyncExtras} from "comsync";
 const packageUrl = require("url-loader!./package.tar").default;
 
-const pyodidePromise = loadPyodideAndPackage({url: packageUrl, format: "tar"})
+const pyodidePromise = loadPyodideAndPackage({url: packageUrl, format: "tar"});
 Comlink.expose({
-  test: pyodideExpose(pyodidePromise,
-    (extras: SyncExtras, pyodide: any, code: string, inputCallback: any, outputCallback: any) => {
+  test: pyodideExpose(
+    pyodidePromise,
+    (
+      extras: SyncExtras,
+      pyodide: any,
+      code: string,
+      inputCallback: any,
+      outputCallback: any,
+    ) => {
       const callback = makeRunnerCallback(extras, {
         input: inputCallback,
         output: outputCallback,
       });
-      const runner = pyodide.pyimport("python_runner").Runner();
+      const runner = pyodide.pyimport("python_runner").PatchedStdinRunner();
       runner.set_callback(callback);
       runner.run(code);
       return "success";
-    }),
+    },
+  ),
 });

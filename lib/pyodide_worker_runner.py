@@ -7,6 +7,9 @@ import pyodide_js  # noqa
 sys.setrecursionlimit(500)
 
 
+original_non_str_input = None
+
+
 def non_str_input(self, line):
     if line == 1:
         raise KeyboardInterrupt
@@ -23,7 +26,7 @@ def non_str_input(self, line):
             "e.g. Chrome or Firefox. "
         )
     else:
-        PatchedStdinRunner.non_str_input(self, line)
+        original_non_str_input(self, line)
 
 
 try:
@@ -31,6 +34,7 @@ try:
 except Exception:
     pass
 else:
+    original_non_str_input = PatchedStdinRunner.non_str_input
     PatchedStdinRunner.non_str_input = non_str_input
 
 

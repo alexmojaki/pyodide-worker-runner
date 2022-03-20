@@ -1,6 +1,13 @@
-import {Channel, makeAtomicsChannel, makeServiceWorkerChannel, ServiceWorkerError, writeMessage} from "sync-message";
+import {
+  asyncSleep,
+  Channel,
+  makeAtomicsChannel,
+  makeServiceWorkerChannel,
+  ServiceWorkerError,
+  writeMessage,
+} from "sync-message";
 import {PyodideClient} from "../lib";
-import * as Comlink from 'comlink';
+import * as Comlink from "comlink";
 import {isEqual} from "lodash";
 
 const Worker = require("worker-loader!./worker").default;
@@ -33,13 +40,15 @@ async function runTests() {
     let resultPromise: Promise<any>;
 
     function runTask(...args: any[]) {
-      resultPromise = client.runTask(client.workerProxy[test], ...args);
+      prompt = "none";
+      resultPromise = client.runTask(client.workerProxy.test, ...args);
     }
 
     async function expect(expected: any) {
       const result = await resultPromise;
-      const actual = {result, output};
+      const actual = {result, output, prompt};
       const passed = isEqual(actual, expected);
+      // console.log(JSON.stringify(output));
       testResults.push({
         test,
         actual,
@@ -54,9 +63,57 @@ async function runTests() {
       output.push(data);
     }
 
-    let test = "test";
-    runTask("print(123)", null, Comlink.proxy(outputCallback));
-    await expect({result: "success", output: [{parts: [{type: "stdout", text: "123\n"}]}]});
+    let prompt = "";
+    function inputCallback(p: string) {
+      prompt = p;
+    }
+
+    let test = "test_print";
+    runTask(
+      "print(123)",
+      Comlink.proxy(inputCallback),
+      Comlink.proxy(outputCallback),
+    );
+
+    await expect({
+      result: "success",
+      prompt: "none",
+      output: [{parts: [{type: "stdout", text: "123\n"}]}],
+    });
+
+    test = "test_input";
+    runTask(
+      "print(int(input('hi')))",
+      Comlink.proxy(inputCallback),
+      Comlink.proxy(outputCallback),
+    );
+    await asyncSleep(100);
+    await client.writeMessage("456");
+    await expect({
+      result: "success",
+      prompt: "hi",
+      output: [
+        {parts: [{type: "stdout", text: "123\n"}]},
+        {
+          parts: [
+            {
+              type: "input_prompt",
+              text: "hi",
+            },
+          ],
+        },
+        {
+          parts: [
+            {type: "input", text: "456\n"},
+            {
+              type: "stdout",
+              text: "456",
+            },
+          ],
+        },
+        {parts: [{type: "stdout", text: "\n"}]},
+      ],
+    });
   }
 
   (window as any).testResults = testResults;

@@ -66,7 +66,10 @@
       "SharedArrayBuffer": "readonly"
     }
   },
-  "peerDependencies": {},
+  "dependencies": {
+    "comsync": "^0.0.6",
+    "p-retry": "^5.0.0"
+  },
   "devDependencies": {
     "@babel/cli": "7.12.17",
     "@babel/core": "7.12.17",
@@ -89,8 +92,5 @@
     "webpack-dev-server": "^4.7.3",
     "worker-loader": "^3.0.8"
   },
-  "dependencies": {
-    "comsync": "^0.0.6",
-    "p-retry": "^5.0.0"
-  }
+  "peerDependencies": {}
 }

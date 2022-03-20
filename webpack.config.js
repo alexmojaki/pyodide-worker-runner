@@ -14,17 +14,17 @@ module.exports = {
     rules: [
       {
         test: /\.ts$/,
-        use: 'ts-loader',
+        use: "ts-loader",
         exclude: /node_modules/,
       },
     ],
   },
   resolve: {
-    extensions: ['.ts', '.js', '.d.ts'],
+    extensions: [".ts", ".js", ".d.ts"],
   },
-  devtool: 'source-map',
+  devtool: "source-map",
   externals: {
-    comlink: 'comlink',
-    'sync-message': 'sync-message',
-  }
+    comlink: "comlink",
+    "sync-message": "sync-message",
+  },
 };

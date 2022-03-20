@@ -9,11 +9,6 @@
     "target": "es6",
     "allowJs": true,
     "moduleResolution": "node",
-    "lib": [
-      "dom",
-      "es5",
-      "scripthost",
-      "webworker"
-    ]
+    "lib": ["dom", "es5", "scripthost", "webworker"]
   }
 }

@@ -22,13 +22,13 @@ module.exports = {
     rules: [
       {
         test: /\.ts$/,
-        use: 'ts-loader',
+        use: "ts-loader",
         exclude: /node_modules/,
       },
     ],
   },
   resolve: {
-    extensions: ['.ts', '.js', '.d.ts'],
+    extensions: [".ts", ".js", ".d.ts"],
   },
-  devtool: 'inline-source-map',
+  devtool: "inline-source-map",
 };
