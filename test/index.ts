@@ -170,7 +170,6 @@ except BaseException as e:
 else:
   print('not!')
 `,
-    "no channel",
   );
   await expect({
     output:
@@ -191,7 +190,6 @@ except BaseException as e:
 else:
   print('not!')
 `,
-    "no service worker",
   );
   await expect({
     output:
