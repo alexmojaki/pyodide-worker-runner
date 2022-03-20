@@ -8,7 +8,6 @@ import {
 } from "sync-message";
 import {PyodideClient, RunnerCallbacks} from "../lib";
 import * as Comlink from "comlink";
-import {isEqual} from "lodash";
 
 const Worker = require("worker-loader!./worker").default;
 
@@ -61,7 +60,10 @@ async function runTests() {
       result: "success",
       prompt: expectedPrompt,
     };
-    const passed = isEqual(actual, expected);
+    const passed =
+      actual.result === expected.result &&
+      actual.output === expected.output &&
+      actual.prompt === expected.prompt;
     console.log(output);
     testResults.push({
       test,
