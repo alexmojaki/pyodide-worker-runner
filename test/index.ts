@@ -47,6 +47,7 @@ async function runTests() {
 
   async function expect(expected: any) {
     const result = await resultPromise;
+    await asyncSleep(100);
     const actual = {result, output, prompt};
     const passed = isEqual(actual, expected);
     console.log(output);
@@ -124,6 +125,24 @@ else:
       output: "input_prompt:interrupt me;" +
         "stdout:KeyboardInterrupt\n;",
     });
+
+    test = "test_sleep";
+    runTask(
+      `
+import time
+start = time.time()
+time.sleep(1)
+end = time.time()
+print(1 < end - start < 1.5)
+`,
+      Comlink.proxy(inputCallback),
+      Comlink.proxy(outputCallback),
+    );
+    await expect({
+      result: "success",
+      prompt: "none",
+      output: "stdout:True;stdout:\n;",
+    });
   }
 
   test = "test_no_channel";
@@ -140,7 +159,6 @@ else:
     null,
     Comlink.proxy(outputCallback),
   );
-  await asyncSleep(100);
   await expect({
     result: "success",
     prompt: "none",
@@ -165,7 +183,6 @@ else:
     null,
     Comlink.proxy(outputCallback),
   );
-  await asyncSleep(100);
   await expect({
     result: "success",
     prompt: "none",
