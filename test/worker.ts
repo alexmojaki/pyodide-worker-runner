@@ -22,7 +22,7 @@ Comlink.expose({
         input: inputCallback,
         output: outputCallback,
       });
-      const runner = pyodide.pyimport("python_runner").PatchedStdinRunner();
+      const runner = pyodide.pyimport("pyodide_worker_runner").Runner();
       runner.set_callback(callback);
       runner.run(code);
       return "success";

@@ -51,6 +51,7 @@ async function runTests() {
       const result = await resultPromise;
       const actual = {result, output, prompt};
       const passed = isEqual(actual, expected);
+      console.log(output);
       testResults.push({
         test,
         actual,

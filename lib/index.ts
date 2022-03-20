@@ -83,18 +83,7 @@ export function makeRunnerCallback(comsyncExtras: SyncExtras, callbacks: any) {
     data = toObject(data);
     if (type === "input") {
       callbacks.input(data.prompt);
-      try {
-        return comsyncExtras.readMessage() + "\n";
-      } catch (e) {
-        if (e.type === "InterruptError") {
-          return 1; // raise KeyboardInterrupt
-        } else if (e.type === "ServiceWorkerError") {
-          return 2; // suggesting closing all tabs and reopening
-        } else if (e.type === "NoChannelError") {
-          return 3; // browser not supported
-        }
-        throw e;
-      }
+      return comsyncExtras.readMessage() + "\n";
     } else if (type === "sleep") {
       try {
         comsyncExtras.syncSleep(data.seconds * 1000);

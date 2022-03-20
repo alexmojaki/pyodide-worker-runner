@@ -6,36 +6,31 @@ import pyodide_js  # noqa
 
 sys.setrecursionlimit(500)
 
-
-original_non_str_input = None
-
-
-def non_str_input(self, line):
-    if line == 1:
-        raise KeyboardInterrupt
-    elif line == 2:
-        raise RuntimeError(
-            "The service worker for reading input isn't working. "
-            "Try closing all this site's tabs, then reopening. "
-            "If that doesn't work, try using a different browser."
-        )
-    elif line == 3:
-        raise RuntimeError(
-            "This browser doesn't support reading input. "
-            "Try upgrading to the most recent version or switching to a different browser, "
-            "e.g. Chrome or Firefox. "
-        )
-    else:
-        original_non_str_input(self, line)
+from python_runner import PatchedStdinRunner
 
 
-try:
-    from python_runner import PatchedStdinRunner
-except Exception:
-    pass
-else:
-    original_non_str_input = PatchedStdinRunner.non_str_input
-    PatchedStdinRunner.non_str_input = non_str_input
+class Runner(PatchedStdinRunner):
+    def readline(self, *args, **kwargs):
+        try:
+            return super().readline(*args, **kwargs)
+        except BaseException as e:
+            typ = getattr(e.js_error, "type", None)
+            if typ == "InterruptError":
+                raise KeyboardInterrupt from None
+            elif typ == "ServiceWorkerError":
+                raise RuntimeError(
+                    "The service worker for reading input isn't working. "
+                    "Try closing all this site's tabs, then reopening. "
+                    "If that doesn't work, try using a different browser."
+                ) from None
+            elif typ == "NoChannelError":
+                raise RuntimeError(
+                    "This browser doesn't support reading input. "
+                    "Try upgrading to the most recent version or switching to a different browser, "
+                    "e.g. Chrome or Firefox."
+                ) from None
+            else:
+                raise
 
 
 def find_imports_to_install(imports):
