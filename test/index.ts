@@ -133,7 +133,7 @@ else:
 try:
   input('no channel')
 except BaseException as e:
-  print(type(e).__name__, e)
+  print(e)
 else:
   print('not!')
 `,
@@ -141,14 +141,39 @@ else:
     Comlink.proxy(outputCallback),
   );
   await asyncSleep(100);
-  await client.interrupt();
   await expect({
     result: "success",
     prompt: "none",
     output: "input_prompt:no channel;" +
-      "stdout:RuntimeError This browser doesn't support reading input. " +
+      "stdout:This browser doesn't support reading input. " +
       "Try upgrading to the most recent version or switching to a different browser, " +
       "e.g. Chrome or Firefox.\n;",
+  });
+
+  test = "test_service_worker_error";
+  client.channel = serviceWorkerChannel;
+  serviceWorkerChannel.baseUrl = window.location.href;
+  runTask(
+    `
+try:
+  input('no service worker')
+except BaseException as e:
+  print(e)
+else:
+  print('not!')
+`,
+    null,
+    Comlink.proxy(outputCallback),
+  );
+  await asyncSleep(100);
+  await expect({
+    result: "success",
+    prompt: "none",
+    output: "input_prompt:no service worker;" +
+      "stdout:The service worker for reading input isn't working. " +
+      "Try closing all this site's tabs, then reopening. " +
+      "If that doesn't work, try using a different browser.;" +
+      "stdout:\n;",
   });
 
   (window as any).testResults = testResults;
