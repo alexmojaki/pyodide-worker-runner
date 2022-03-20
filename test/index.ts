@@ -54,7 +54,7 @@ async function runTests() {
     const result = await resultPromise;
     await asyncSleep(100);
     const actual = {result, output, prompt};
-    const passed = isEqual(actual, expected);
+    const passed = isEqual(actual, {...expected, result: "success"});
     console.log(output);
     testResults.push({
       test,
@@ -83,7 +83,6 @@ async function runTests() {
     runCode("print(123)");
 
     await expect({
-      result: "success",
       prompt: "none",
       output: "stdout:123\n;",
     });
@@ -93,7 +92,6 @@ async function runTests() {
     await asyncSleep(100);
     await client.writeMessage("456");
     await expect({
-      result: "success",
       prompt: "hi",
       output: `input_prompt:hi;input:456
 ;stdout:456;stdout:
@@ -114,7 +112,6 @@ else:
     await asyncSleep(100);
     await client.interrupt();
     await expect({
-      result: "success",
       prompt: "interrupt me",
       output: `input_prompt:interrupt me;stdout:KeyboardInterrupt
 ;`,
@@ -131,7 +128,6 @@ print(1 < end - start < 1.5)
 `,
     );
     await expect({
-      result: "success",
       prompt: "none",
       output: "stdout:True;stdout:\n;",
     });
@@ -154,7 +150,6 @@ print(end - start < 0.5)
     await asyncSleep(100);
     await client.interrupt();
     await expect({
-      result: "success",
       prompt: "none",
       output: `stdout:KeyboardInterrupt
 True
@@ -175,7 +170,6 @@ else:
 `,
   );
   await expect({
-    result: "success",
     prompt: "no channel",
     output:
       "input_prompt:no channel;" +
@@ -197,7 +191,6 @@ else:
 `,
   );
   await expect({
-    result: "success",
     prompt: "no service worker",
     output:
       "input_prompt:no service worker;" +
@@ -223,7 +216,6 @@ else:
     await asyncSleep(100);
     await client.interrupt();
     await expect({
-      result: "success",
       prompt: "none",
       output: "stdout:KeyboardInterrupt\n;",
     });
