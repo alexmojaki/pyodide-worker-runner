@@ -2,21 +2,25 @@
 // Otherwise webpack fails silently
 // https://github.com/facebook/create-react-app/issues/8014
 
-import {pyodideExpose, loadPyodideAndPackage, makeRunnerCallback} from "../lib";
+import {
+  loadPyodideAndPackage,
+  makeRunnerCallback,
+  pyodideExpose,
+  RunnerCallbacks,
+} from "../lib";
 import * as Comlink from "comlink";
-import {SyncExtras} from "comsync";
+
 const packageUrl = require("url-loader!./package.tar").default;
 
-const pyodidePromise = loadPyodideAndPackage({url: packageUrl, format: "tar"});
 Comlink.expose({
   test: pyodideExpose(
-    pyodidePromise,
+    loadPyodideAndPackage({url: packageUrl, format: "tar"}),
     (
-      extras: SyncExtras,
-      pyodide: any,
+      extras,
+      pyodide,
       code: string,
-      inputCallback: any,
-      outputCallback: any,
+      inputCallback: RunnerCallbacks["input"],
+      outputCallback: RunnerCallbacks["output"],
     ) => {
       const callback = makeRunnerCallback(extras, {
         input: inputCallback,

@@ -6,7 +6,7 @@ import {
   ServiceWorkerError,
   writeMessage,
 } from "sync-message";
-import {OutputPart, PyodideClient} from "../lib";
+import {PyodideClient, RunnerCallbacks} from "../lib";
 import * as Comlink from "comlink";
 import {isEqual} from "lodash";
 
@@ -65,15 +65,15 @@ async function runTests() {
     });
   }
 
-  function outputCallback(parts: OutputPart[]) {
+  const outputCallback: RunnerCallbacks["output"] = (parts) => {
     for (const part of parts) {
       output += `${part.type}:${part.text};`;
     }
-  }
+  };
 
-  function inputCallback(p: string) {
+  const inputCallback: RunnerCallbacks["input"] = (p) => {
     prompt = p;
-  }
+  };
 
   for (const channel of channels) {
     channelType = channel.type;

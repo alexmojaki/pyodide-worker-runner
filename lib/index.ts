@@ -5,7 +5,7 @@ import * as Comlink from "comlink";
 const pyodide_worker_runner_contents = require("!!raw-loader!./pyodide_worker_runner.py")
   .default;
 
-declare interface Pyodide {
+export declare interface Pyodide {
   unpackArchive: (
     buffer: ArrayBuffer,
     format: string,
@@ -87,7 +87,7 @@ export interface OutputPart {
 }
 
 export interface RunnerCallbacks {
-  input?: (prompt: string) => string;
+  input?: (prompt: string) => void;
   output: (parts: OutputPart[]) => unknown;
   [key: string]: (data: unknown) => unknown;
 }
