@@ -1,6 +1,7 @@
 import {Channel, makeAtomicsChannel, makeServiceWorkerChannel, ServiceWorkerError, writeMessage} from "sync-message";
 import {PyodideClient} from "../lib";
 import * as Comlink from 'comlink';
+import {isEqual} from "lodash";
 
 const Worker = require("worker-loader!./worker").default;
 
@@ -23,7 +24,7 @@ async function runTests() {
     channels.push(makeAtomicsChannel());
   }
 
-  const client = new PyodideClient<any>(() => new Worker());
+  const client = new PyodideClient(() => new Worker());
   const testResults: any[] = [];
 
   for (const channel of channels) {
@@ -37,10 +38,11 @@ async function runTests() {
 
     async function expect(expected: any) {
       const result = await resultPromise;
-      const passed = result === result;
+      const actual = {result, output};
+      const passed = isEqual(actual, expected);
       testResults.push({
         test,
-        result,
+        actual,
         expected,
         passed,
         channelType,
@@ -54,8 +56,7 @@ async function runTests() {
 
     let test = "test";
     runTask("print(123)", null, Comlink.proxy(outputCallback));
-    await expect("success");
-    console.log(output);  // TODO assert equal
+    await expect({result: "success", output: [{parts: [{type: "stdout", text: "123\n"}]}]});
   }
 
   (window as any).testResults = testResults;
