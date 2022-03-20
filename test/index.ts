@@ -35,7 +35,7 @@ async function runTests() {
   const testResults: any[] = [];
   let test = "";
   let channelType = "";
-  let resultPromise: Promise<any>;
+  let resultPromise: Promise<"success">;
   let output = "";
   let prompt: string | undefined;
   let expectedPrompt: string | undefined;
@@ -86,9 +86,8 @@ async function runTests() {
     channelType = channel.type;
     client.channel = channel;
 
-    let test = "test_print";
+    test = "test_print";
     runCode("print(123)");
-
     await expect("stdout:123\n;");
 
     test = "test_input";
