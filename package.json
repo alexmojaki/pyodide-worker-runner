@@ -1,6 +1,6 @@
 {
   "name": "pyodide-worker-runner",
-  "version": "0.0.3",
+  "version": "0.0.6",
   "private": false,
   "repository": {
     "type": "git",
@@ -88,7 +88,7 @@
     "worker-loader": "^3.0.8"
   },
   "dependencies": {
-    "comsync": "^0.0.4",
+    "comsync": "^0.0.6",
     "p-retry": "^5.0.0"
   }
 }

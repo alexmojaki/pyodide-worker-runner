@@ -1,5 +1,5 @@
 import pRetry from 'p-retry';
-import {exposeSync, ExposeSyncExtras, TaskClient} from "comsync";
+import {syncExpose, SyncExtras, SyncClient} from "comsync";
 import * as Comlink from 'comlink';
 
 const pyodide_worker_runner_contents = require("!!raw-loader!./pyodide_worker_runner.py").default;
@@ -72,7 +72,7 @@ export function toObject(x: any): any {
   }
 }
 
-export function makeRunnerCallback(comsyncExtras: ExposeSyncExtras, callbacks: any) {
+export function makeRunnerCallback(comsyncExtras: SyncExtras, callbacks: any) {
   return function (type: string, data: any) {
     data = toObject(data);
     if (type === "input") {
@@ -101,8 +101,8 @@ export function makeRunnerCallback(comsyncExtras: ExposeSyncExtras, callbacks: a
   }
 }
 
-export function exposePyodide(pyodidePromise: Promise<Pyodide>, func: any) {
-  return exposeSync(async function (comsyncExtras, interruptBuffer, ...args) {
+export function pyodideExpose(pyodidePromise: Promise<Pyodide>, func: any) {
+  return syncExpose(async function (comsyncExtras, interruptBuffer, ...args) {
     const pyodide = await pyodidePromise;
 
     if (interruptBuffer) {
@@ -113,7 +113,7 @@ export function exposePyodide(pyodidePromise: Promise<Pyodide>, func: any) {
   });
 }
 
-export class PyodideTaskClient<T> extends TaskClient<T> {
+export class PyodideClient<T> extends SyncClient<T> {
   async runTask(proxyMethod: any, ...args: any[]) {
     let interruptBuffer = null;
     if (typeof SharedArrayBuffer !== "undefined") {
@@ -123,6 +123,6 @@ export class PyodideTaskClient<T> extends TaskClient<T> {
       }
     }
 
-    return super.runTask(proxyMethod, interruptBuffer, ...args);
+    return super.call(proxyMethod, interruptBuffer, ...args);
   }
 }

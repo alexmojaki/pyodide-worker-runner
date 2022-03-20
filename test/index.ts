@@ -1,5 +1,5 @@
 import {Channel, makeAtomicsChannel, makeServiceWorkerChannel, ServiceWorkerError, writeMessage} from "sync-message";
-import {PyodideTaskClient} from "../lib";
+import {PyodideClient} from "../lib";
 import * as Comlink from 'comlink';
 
 const Worker = require("worker-loader!./worker").default;
@@ -23,7 +23,7 @@ async function runTests() {
     channels.push(makeAtomicsChannel());
   }
 
-  const client = new PyodideTaskClient<any>(() => new Worker());
+  const client = new PyodideClient<any>(() => new Worker());
   const testResults: any[] = [];
 
   for (const channel of channels) {
