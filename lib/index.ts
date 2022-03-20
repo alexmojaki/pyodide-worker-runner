@@ -101,6 +101,8 @@ export function makeRunnerCallback(comsyncExtras: SyncExtras, callbacks: any) {
       } catch (e) {
         console.error(e);
       }
+    } else if (type === "output") {
+      callbacks.output(data.parts);
     } else {
       callbacks[type](data);
     }

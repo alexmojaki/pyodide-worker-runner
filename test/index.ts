@@ -38,9 +38,12 @@ async function runTests() {
     const channelType = channel.type;
     client.channel = channel;
     let resultPromise: Promise<any>;
+    let output = "";
+    let prompt = "";
 
     function runTask(...args: any[]) {
       prompt = "none";
+      output = "";
       resultPromise = client.runTask(client.workerProxy.test, ...args);
     }
 
@@ -48,7 +51,6 @@ async function runTests() {
       const result = await resultPromise;
       const actual = {result, output, prompt};
       const passed = isEqual(actual, expected);
-      // console.log(JSON.stringify(output));
       testResults.push({
         test,
         actual,
@@ -58,12 +60,12 @@ async function runTests() {
       });
     }
 
-    const output: any[] = [];
-    function outputCallback(data: any) {
-      output.push(data);
+    function outputCallback(parts: any[]) {
+      for (const part of parts) {
+        output += `${part.type}:${part.text};`
+      }
     }
 
-    let prompt = "";
     function inputCallback(p: string) {
       prompt = p;
     }
@@ -78,7 +80,7 @@ async function runTests() {
     await expect({
       result: "success",
       prompt: "none",
-      output: [{parts: [{type: "stdout", text: "123\n"}]}],
+      output: "stdout:123\n;",
     });
 
     test = "test_input";
@@ -92,27 +94,7 @@ async function runTests() {
     await expect({
       result: "success",
       prompt: "hi",
-      output: [
-        {parts: [{type: "stdout", text: "123\n"}]},
-        {
-          parts: [
-            {
-              type: "input_prompt",
-              text: "hi",
-            },
-          ],
-        },
-        {
-          parts: [
-            {type: "input", text: "456\n"},
-            {
-              type: "stdout",
-              text: "456",
-            },
-          ],
-        },
-        {parts: [{type: "stdout", text: "\n"}]},
-      ],
+      output: "input_prompt:hi;input:456\n;stdout:456;stdout:\n;",
     });
   }
 
