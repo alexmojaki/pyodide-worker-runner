@@ -94,7 +94,32 @@ async function runTests() {
     await expect({
       result: "success",
       prompt: "hi",
-      output: "input_prompt:hi;input:456\n;stdout:456;stdout:\n;",
+      output: "input_prompt:hi;" +
+        "input:456\n;" +
+        "stdout:456;" +
+        "stdout:\n;",
+    });
+
+    test = "test_interrupt_input";
+    runTask(
+`
+try:
+  input('interrupt me')
+except BaseException as e:
+  print(type(e).__name__)
+else:
+  print('not!')
+`,
+      Comlink.proxy(inputCallback),
+      Comlink.proxy(outputCallback),
+    );
+    await asyncSleep(100);
+    await client.interrupt();
+    await expect({
+      result: "success",
+      prompt: "interrupt me",
+      output: "input_prompt:interrupt me;" +
+        "stdout:KeyboardInterrupt\n;",
     });
   }
 
