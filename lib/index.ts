@@ -24,8 +24,8 @@ export interface PackageOptions {
   extract_dir?: string;
 }
 
-function defaultPyodideLoader() {
-  const indexURL = "https://cdn.jsdelivr.net/pyodide/v0.19.0/full/";
+export function defaultPyodideLoader(version = "0.19.1") {
+  const indexURL = `https://cdn.jsdelivr.net/pyodide/v${version}/full/`;
   importScripts(indexURL + "pyodide.js");
   return loadPyodide({indexURL});
 }
