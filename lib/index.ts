@@ -115,21 +115,21 @@ export function makeRunnerCallback(
 }
 
 export function pyodideExpose<T extends any[], R>(
-  pyodidePromise: Promise<Pyodide>,
-  func: (extras: SyncExtras, pyodide: Pyodide, ...args: T) => R,
+  pyodidePromise: Promise<Pyodide> | Pyodide,
+  func: (extras: SyncExtras, ...args: T) => R,
 ) {
   return syncExpose(async function (
     comsyncExtras: SyncExtras,
     interruptBuffer: Int32Array | null,
     ...args: T
   ): Promise<R> {
-    const pyodide = await pyodidePromise;
+    const pyodide = await Promise.resolve(pyodidePromise);
 
     if (interruptBuffer) {
       pyodide.setInterruptBuffer(interruptBuffer);
     }
 
-    return func(comsyncExtras, pyodide, ...args);
+    return func(comsyncExtras, ...args);
   });
 }
 
