@@ -29,8 +29,8 @@ In the main thread, construct a `PyodideClient` instead of a `comsync.SyncClient
 
 In the worker, use `pyodideExpose` which accepts two arguments:
 
-1. A `Promise` which resolves to a Pyodide module object, as returned by `loadPyodideAndPackage` above or just `pyodide.loadPyodide`.
-2. A function which will be passed to `comsync.syncExpose`. The first argument passed to this function will be a `SyncExtras` object as usual, the second argument will be the Pyodide module resolved from the promise above, and the rest will be the arguments passed to `PyodideClient.call`.
+1. A Pyodide module object or a `Promise` which resolves to it, as returned by `loadPyodideAndPackage` above or just `pyodide.loadPyodide`. It is also accessible via `defaultPyodideLoader`.
+2. A function which will be passed to `comsync.syncExpose`. The first argument passed to this function will be a `SyncExtras` object as usual, and the rest will be the arguments passed to `PyodideClient.call`.
 
 `pyodideExpose` will take care of the interrupt buffer sent by `PyodideClient.call`.
 
