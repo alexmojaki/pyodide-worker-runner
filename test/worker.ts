@@ -11,13 +11,11 @@ import {
 import * as Comlink from "comlink";
 
 const packageUrl = require("url-loader!./package.tar").default;
-
+const pyodidePromise = loadPyodideAndPackage({ url: packageUrl, format: "tar" });
 Comlink.expose({
   test: pyodideExpose(
-    loadPyodideAndPackage({url: packageUrl, format: "tar"}),
-    (
+    async (
       extras,
-      pyodide,
       code: string,
       inputCallback: RunnerCallbacks["input"],
       outputCallback: RunnerCallbacks["output"],
@@ -26,6 +24,10 @@ Comlink.expose({
         input: inputCallback,
         output: outputCallback,
       });
+      const pyodide = await pyodidePromise;
+      if(extras.interruptBuffer){
+        pyodide.setInterruptBuffer(extras.interruptBuffer);
+      }
       const runner = pyodide.pyimport("python_runner").PyodideRunner();
       runner.set_callback(callback);
       runner.run(code);
