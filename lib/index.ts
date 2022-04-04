@@ -126,7 +126,7 @@ export function pyodideExpose<T extends any[], R>(
     interruptBuffer: Int32Array | null,
     ...args: T
   ): Promise<R> {
-    const pyodideExtras = { ...comsyncExtras };
+    const pyodideExtras: PyodideExtras = { ...comsyncExtras };
     pyodideExtras.interruptBuffer = interruptBuffer;
     return func(pyodideExtras, ...args);
   });

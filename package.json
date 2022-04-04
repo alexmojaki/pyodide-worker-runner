@@ -67,7 +67,6 @@
     }
   },
   "dependencies": {
-    "comsync": "^0.0.6",
     "p-retry": "^5.0.0"
   },
   "devDependencies": {
@@ -92,5 +91,7 @@
     "webpack-dev-server": "^4.7.3",
     "worker-loader": "^3.0.8"
   },
-  "peerDependencies": {}
+  "peerDependencies": {
+    "comsync": "^0.0.7"
+  }
 }
