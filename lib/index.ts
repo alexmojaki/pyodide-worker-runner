@@ -1,5 +1,5 @@
 import pRetry from "p-retry";
-import {syncExpose, SyncExtras, SyncClient} from "comsync";
+import { syncExpose, SyncExtras, SyncClient } from "comsync";
 import * as Comlink from "comlink";
 
 const pyodide_worker_runner_contents = require("!!raw-loader!./pyodide_worker_runner.py")
@@ -15,7 +15,7 @@ export declare interface Pyodide {
   registerComlink: any;
   setInterruptBuffer: (buffer: Int32Array) => void;
 }
-declare function loadPyodide(options: {indexURL: string}): Promise<Pyodide>;
+declare function loadPyodide(options: { indexURL: string }): Promise<Pyodide>;
 
 export type PyodideLoader = () => Promise<Pyodide>;
 export interface PackageOptions {
@@ -27,20 +27,20 @@ export interface PackageOptions {
 export function defaultPyodideLoader(version = "0.19.1") {
   const indexURL = `https://cdn.jsdelivr.net/pyodide/v${version}/full/`;
   importScripts(indexURL + "pyodide.js");
-  return loadPyodide({indexURL});
+  return loadPyodide({ indexURL });
 }
 
 export async function loadPyodideAndPackage(
   packageOptions: PackageOptions,
   pyodideLoader: PyodideLoader = defaultPyodideLoader,
 ) {
-  const {format, extract_dir, url} = packageOptions;
+  const { format, extract_dir, url } = packageOptions;
 
   let pyodide: Pyodide;
   let packageBuffer: ArrayBuffer;
   [pyodide, packageBuffer] = await Promise.all([
     pyodideLoader(),
-    pRetry(() => getPackageBuffer(url), {retries: 3}),
+    pRetry(() => getPackageBuffer(url), { retries: 3 }),
   ]);
 
   pyodide.unpackArchive(packageBuffer, format, extract_dir);
@@ -98,7 +98,7 @@ export function makeRunnerCallback(
 ) {
   return function (type: string, data: any) {
     if (data.toJs) {
-      data = data.toJs({dict_converter: Object.fromEntries});
+      data = data.toJs({ dict_converter: Object.fromEntries });
     }
 
     if (type === "input") {
@@ -114,22 +114,19 @@ export function makeRunnerCallback(
   };
 }
 
+export interface PyodideExtras extends SyncExtras {
+  interruptBuffer: Int32Array | null;
+}
+
 export function pyodideExpose<T extends any[], R>(
-  pyodidePromise: Promise<Pyodide> | Pyodide,
-  func: (extras: SyncExtras, ...args: T) => R,
+  func: (extras: PyodideExtras, ...args: T) => R,
 ) {
   return syncExpose(async function (
     comsyncExtras: SyncExtras,
     interruptBuffer: Int32Array | null,
     ...args: T
   ): Promise<R> {
-    const pyodide = await Promise.resolve(pyodidePromise);
-
-    if (interruptBuffer) {
-      pyodide.setInterruptBuffer(interruptBuffer);
-    }
-
-    return func(comsyncExtras, ...args);
+    return func({...comsyncExtras, interruptBuffer}, ...args);
   });
 }
 

@@ -11,10 +11,9 @@ import {
 import * as Comlink from "comlink";
 
 const packageUrl = require("url-loader!./package.tar").default;
-const pyodide = loadPyodideAndPackage({url: packageUrl, format: "tar"});
+const pyodidePromise = loadPyodideAndPackage({ url: packageUrl, format: "tar" });
 Comlink.expose({
   test: pyodideExpose(
-    pyodide,
     async (
       extras,
       code: string,
@@ -25,7 +24,11 @@ Comlink.expose({
         input: inputCallback,
         output: outputCallback,
       });
-      const runner = (await pyodide).pyimport("python_runner").PyodideRunner();
+      const pyodide = await pyodidePromise;
+      if(extras.interruptBuffer){
+        pyodide.setInterruptBuffer(extras.interruptBuffer);
+      }
+      const runner = pyodide.pyimport("python_runner").PyodideRunner();
       runner.set_callback(callback);
       runner.run(code);
       return "success";
