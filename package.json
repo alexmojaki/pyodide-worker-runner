@@ -93,6 +93,6 @@
     "worker-loader": "^3.0.8"
   },
   "peerDependencies": {
-    "comsync": "^0.0.7"
+    "comsync": "*"
   }
 }
