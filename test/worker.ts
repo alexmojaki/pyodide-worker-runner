@@ -11,7 +11,7 @@ import {
 import * as Comlink from "comlink";
 
 const packageUrl = require("url-loader!./package.tar").default;
-const pyodidePromise = loadPyodideAndPackage({ url: packageUrl, format: "tar" });
+const pyodidePromise = loadPyodideAndPackage({url: packageUrl, format: "tar"});
 Comlink.expose({
   test: pyodideExpose(
     async (
@@ -25,7 +25,7 @@ Comlink.expose({
         output: outputCallback,
       });
       const pyodide = await pyodidePromise;
-      if(extras.interruptBuffer){
+      if (extras.interruptBuffer) {
         pyodide.setInterruptBuffer(extras.interruptBuffer);
       }
       const runner = pyodide.pyimport("python_runner").PyodideRunner();

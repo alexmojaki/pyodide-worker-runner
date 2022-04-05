@@ -1762,10 +1762,10 @@ compression@^1.7.4:
     safe-buffer "5.1.2"
     vary "~1.1.2"
 
-comsync@^0.0.6:
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/comsync/-/comsync-0.0.6.tgz#5827ae89d4b590967051c56935260d4d157c3a52"
-  integrity sha512-K9Ml9bFj6l7UCAw951gEQyegk7dEDWanSpPKoUUoDj3l4+2oR0OMHzpNu1RaON+gBzOnNNfl1GBzSqhAOCZ3Xg==
+comsync@^0.0.7:
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/comsync/-/comsync-0.0.7.tgz#fd148e98815402db7ef27782f5992c719aa8cd87"
+  integrity sha512-/MarUXxRBvSg3m38qxg8Kx0g8pgc3ENbYXUOL2Hf2jysjniEKD/DFxlQNdiNDWDbeVUrpMcM5KZq+oqh01lgcA==
 
 concat-map@0.0.1:
   version "0.0.1"
