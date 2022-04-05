@@ -26,5 +26,6 @@ module.exports = {
   externals: {
     comlink: "comlink",
     "sync-message": "sync-message",
+    comsync: "comsync",
   },
 };

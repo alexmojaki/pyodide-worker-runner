@@ -67,7 +67,6 @@
     }
   },
   "dependencies": {
-    "comsync": "^0.0.6",
     "p-retry": "^5.0.0"
   },
   "devDependencies": {
@@ -77,6 +76,7 @@
     "@types/lodash": "^4.14.180",
     "babel-eslint": "10.1.0",
     "comlink": "^4.3.1",
+    "comsync": "^0.0.7",
     "eslint": "7.32.0",
     "html-webpack-plugin": "^5.5.0",
     "lodash": "^4.17.21",
@@ -92,5 +92,7 @@
     "webpack-dev-server": "^4.7.3",
     "worker-loader": "^3.0.8"
   },
-  "peerDependencies": {}
+  "peerDependencies": {
+    "comsync": "*"
+  }
 }

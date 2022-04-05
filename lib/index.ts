@@ -114,26 +114,23 @@ export function makeRunnerCallback(
   };
 }
 
+export interface PyodideExtras extends SyncExtras {
+  interruptBuffer: Int32Array | null;
+}
+
 export function pyodideExpose<T extends any[], R>(
-  pyodidePromise: Promise<Pyodide> | Pyodide,
-  func: (extras: SyncExtras, ...args: T) => R,
+  func: (extras: PyodideExtras, ...args: T) => R,
 ) {
   return syncExpose(async function (
     comsyncExtras: SyncExtras,
     interruptBuffer: Int32Array | null,
     ...args: T
   ): Promise<R> {
-    const pyodide = await Promise.resolve(pyodidePromise);
-
-    if (interruptBuffer) {
-      pyodide.setInterruptBuffer(interruptBuffer);
-    }
-
-    return func(comsyncExtras, ...args);
+    return func({...comsyncExtras, interruptBuffer}, ...args);
   });
 }
 
-export class PyodideClient<T> extends SyncClient<T> {
+export class PyodideClient<T=any> extends SyncClient<T> {
   async call(proxyMethod: any, ...args: any[]) {
     let interruptBuffer: Int32Array | null = null;
     if (typeof SharedArrayBuffer !== "undefined") {
