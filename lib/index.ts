@@ -130,7 +130,7 @@ export function pyodideExpose<T extends any[], R>(
   });
 }
 
-export class PyodideClient<T> extends SyncClient<T> {
+export class PyodideClient<T=any> extends SyncClient<T> {
   async call(proxyMethod: any, ...args: any[]) {
     let interruptBuffer: Int32Array | null = null;
     if (typeof SharedArrayBuffer !== "undefined") {

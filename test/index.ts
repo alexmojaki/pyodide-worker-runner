@@ -30,7 +30,7 @@ async function runTests() {
     channels.push(makeAtomicsChannel());
   }
 
-  const client = new PyodideClient<any>(() => new Worker());
+  const client = new PyodideClient(() => new Worker());
   const testResults: any[] = [];
   let test = "";
   let channelType = "";
