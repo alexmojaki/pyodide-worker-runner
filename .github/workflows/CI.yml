@@ -35,9 +35,7 @@ jobs:
           path: ${{ steps.yarn-cache.outputs.dir }}
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
       - name: Yarn install
-        run: |
-          yarn add -D comsync
-          yarn --frozen-lockfile
+        run: yarn --frozen-lockfile
       - name: 'BrowserStack Env Setup'
         uses: 'browserstack/github-actions/setup-env@master'
         with:
