@@ -1,5 +1,5 @@
 import pRetry from "p-retry";
-import {syncExpose, SyncExtras, SyncClient} from "comsync";
+import {SyncClient, syncExpose, SyncExtras} from "comsync";
 import * as Comlink from "comlink";
 
 const pyodide_worker_runner_contents = require("!!raw-loader!./pyodide_worker_runner.py")
@@ -15,7 +15,7 @@ export declare interface Pyodide {
   registerComlink: any;
   setInterruptBuffer: (buffer: Int32Array) => void;
 }
-declare function loadPyodide(options: {indexURL: string}): Promise<Pyodide>;
+declare function loadPyodide(options?: {indexURL: string}): Promise<Pyodide>;
 
 export type PyodideLoader = () => Promise<Pyodide>;
 export interface PackageOptions {
@@ -25,9 +25,8 @@ export interface PackageOptions {
 }
 
 export function defaultPyodideLoader(version = "0.20.0") {
-  const indexURL = `https://cdn.jsdelivr.net/pyodide/v${version}/full/`;
-  importScripts(indexURL + "pyodide.js");
-  return loadPyodide({indexURL});
+  importScripts(`https://cdn.jsdelivr.net/pyodide/v${version}/full/pyodide.js`);
+  return loadPyodide();
 }
 
 export async function loadPyodideAndPackage(
