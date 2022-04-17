@@ -9,7 +9,7 @@ export declare interface Pyodide {
   unpackArchive: (
     buffer: ArrayBuffer,
     format: string,
-    extract_dir?: string,
+    options?: {extractDir?: string},
   ) => void;
   pyimport: (name: string) => any;
   registerComlink: any;
@@ -21,10 +21,10 @@ export type PyodideLoader = () => Promise<Pyodide>;
 export interface PackageOptions {
   format: string;
   url: string;
-  extract_dir?: string;
+  extractDir?: string;
 }
 
-export function defaultPyodideLoader(version = "0.19.1") {
+export function defaultPyodideLoader(version = "0.20.0") {
   const indexURL = `https://cdn.jsdelivr.net/pyodide/v${version}/full/`;
   importScripts(indexURL + "pyodide.js");
   return loadPyodide({indexURL});
@@ -34,7 +34,8 @@ export async function loadPyodideAndPackage(
   packageOptions: PackageOptions,
   pyodideLoader: PyodideLoader = defaultPyodideLoader,
 ) {
-  const {format, extract_dir, url} = packageOptions;
+  let {format, extractDir, url} = packageOptions;
+  extractDir = extractDir || "/tmp/";
 
   let pyodide: Pyodide;
   let packageBuffer: ArrayBuffer;
@@ -43,12 +44,10 @@ export async function loadPyodideAndPackage(
     pRetry(() => getPackageBuffer(url), {retries: 3}),
   ]);
 
-  pyodide.unpackArchive(packageBuffer, format, extract_dir);
-  const sys = pyodide.pyimport("sys");
+  pyodide.unpackArchive(packageBuffer, format, {extractDir});
 
-  if (extract_dir) {
-    sys.path.append(extract_dir);
-  }
+  const sys = pyodide.pyimport("sys");
+  sys.path.append(extractDir);
 
   initPyodide(pyodide);
 
