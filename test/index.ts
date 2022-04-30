@@ -153,6 +153,17 @@ print(end - start < 0.5)
 True
 ;`,
     );
+
+    test = "test_other_callback";
+    runCode(
+      `
+print(runner.callback("foo", bar="spam"))
+`,
+    );
+    await expect(
+      `stdout:foo-{"bar":"spam"}
+;`,
+    );
   }
 
   test = "test_no_channel";
