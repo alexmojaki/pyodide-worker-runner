@@ -25,14 +25,24 @@ If you don't use `loadPyodideAndPackage` and just load Pyodide yourself, then we
 
 This library builds on [`comsync`](https://github.com/alexmojaki/comsync) to help with interrupting running code and synchronously sleeping and reading from stdin.
 
-In the main thread, construct a `PyodideClient` instead of a `comsync.SyncClient`. If `SharedArrayBuffer` is available (see the guide to [enabling cross-origin isolation](https://web.dev/cross-origin-isolation-guide/#enable-cross-origin-isolation)) then it will create a buffer which will ultimately be passed to [`pyodide.setInterruptBuffer`](https://pyodide.org/en/stable/usage/api/js-api.html#pyodide.setInterruptBuffer) in the worker, and set an `interrupter` function on the client. Then calling `PyodideClient.interrupt()` (see the `comsync` documentation) may use that which will raise a `KeyboardInterrupt` in Python.
+In the main thread, construct a `PyodideClient` instead of a `comsync.SyncClient`. If `SharedArrayBuffer` is available (see the guide to [enabling cross-origin isolation](https://web.dev/cross-origin-isolation-guide/#enable-cross-origin-isolation)) then it will create a buffer which can ultimately be passed to [`pyodide.setInterruptBuffer`](https://pyodide.org/en/stable/usage/api/js-api.html#pyodide.setInterruptBuffer) in the worker, and set an `interrupter` function on the client. Then calling `PyodideClient.interrupt()` (see the `comsync` documentation) may use that which will raise a `KeyboardInterrupt` in Python.
 
-In the worker, use `pyodideExpose` which accepts two arguments:
+In the worker, call `pyodideExpose(func)` where `func` is a function which will be passed to `comsync.syncExpose`. The first argument passed to this function will be a `SyncExtras` object with one extra property `interruptBuffer` which can be passed to [`pyodide.setInterruptBuffer`](https://pyodide.org/en/stable/usage/api/js-api.html#pyodide.setInterruptBuffer). The other arguments will be the arguments passed to `PyodideClient.call`. Here's what this may look like in the worker:
 
-1. A Pyodide module object or a `Promise` which resolves to it, as returned by `loadPyodideAndPackage` above or just `pyodide.loadPyodide`. It is also accessible via `defaultPyodideLoader`.
-2. A function which will be passed to `comsync.syncExpose`. The first argument passed to this function will be a `SyncExtras` object as usual, and the rest will be the arguments passed to `PyodideClient.call`.
+```js
+import {pyodideExpose} from "pyodide-worker-runner";
+import * as Comlink from "comlink";
 
-`pyodideExpose` will take care of the interrupt buffer sent by `PyodideClient.call`.
+Comlink.expose({
+  runCode: pyodideExpose((extras, code) => {
+      if (extras.interruptBuffer) {  // i.e. if SharedArrayBuffer is available so this could be sent by the client
+        pyodide.setInterruptBuffer(extras.interruptBuffer);
+      }
+      pyodide.runCode(code);
+    },
+  ),
+});
+```
 
 ## `python_runner` integration
 

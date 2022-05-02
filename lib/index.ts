@@ -87,7 +87,7 @@ export interface OutputPart {
 export interface RunnerCallbacks {
   input?: (prompt: string) => void;
   output: (parts: OutputPart[]) => unknown;
-  [key: string]: (data: unknown) => unknown;
+  other?: (type: string, data: unknown) => unknown;
 }
 
 export function makeRunnerCallback(
@@ -107,7 +107,7 @@ export function makeRunnerCallback(
     } else if (type === "output") {
       return callbacks.output(data.parts);
     } else {
-      return callbacks[type](data);
+      return callbacks.other(type, data);
     }
   };
 }
@@ -128,7 +128,7 @@ export function pyodideExpose<T extends any[], R>(
   });
 }
 
-export class PyodideClient<T=any> extends SyncClient<T> {
+export class PyodideClient<T = any> extends SyncClient<T> {
   async call(proxyMethod: any, ...args: any[]) {
     let interruptBuffer: Int32Array | null = null;
     if (typeof SharedArrayBuffer !== "undefined") {

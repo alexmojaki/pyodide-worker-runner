@@ -23,6 +23,7 @@ Comlink.expose({
       const callback = makeRunnerCallback(extras, {
         input: inputCallback,
         output: outputCallback,
+        other: (type, data) => type + "-" + JSON.stringify(data),
       });
       const pyodide = await pyodidePromise;
       if (extras.interruptBuffer) {
@@ -30,6 +31,7 @@ Comlink.expose({
       }
       const runner = pyodide.pyimport("python_runner").PyodideRunner();
       runner.set_callback(callback);
+      pyodide.pyimport("builtins").runner = runner;
       runner.run(code);
       return "success";
     },

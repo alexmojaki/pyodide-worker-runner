@@ -9,12 +9,6 @@
     "target": "es6",
     "allowJs": true,
     "moduleResolution": "node",
-    "lib": [
-      "dom",
-      "es6",
-      "scripthost",
-      "webworker",
-      "es2017.sharedmemory"
-    ]
+    "lib": ["dom", "es6", "scripthost", "webworker", "es2017.sharedmemory"]
   }
 }

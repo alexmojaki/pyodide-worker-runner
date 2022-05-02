@@ -1762,10 +1762,10 @@ compression@^1.7.4:
     safe-buffer "5.1.2"
     vary "~1.1.2"
 
-comsync@^0.0.7:
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/comsync/-/comsync-0.0.7.tgz#fd148e98815402db7ef27782f5992c719aa8cd87"
-  integrity sha512-/MarUXxRBvSg3m38qxg8Kx0g8pgc3ENbYXUOL2Hf2jysjniEKD/DFxlQNdiNDWDbeVUrpMcM5KZq+oqh01lgcA==
+comsync@^0.0.8:
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/comsync/-/comsync-0.0.8.tgz#919cecdbd09c644deab0b85f6192f691d966ee85"
+  integrity sha512-K5Onmu1SBdlsCguzHR2HxLkhnAz+nAUHflygqk8UfkAc2pJuSpr3zrNL1g6LaBM5s/CycyqAaLY+Ujbxq9ZENg==
 
 concat-map@0.0.1:
   version "0.0.1"
@@ -4415,10 +4415,10 @@ supports-preserve-symlinks-flag@^1.0.0:
   resolved "https://registry.yarnpkg.com/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz#6eda4bd344a3c94aea376d4cc31bc77311039e09"
   integrity sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==
 
-sync-message@^0.0.9:
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/sync-message/-/sync-message-0.0.9.tgz#8da80c1103b5eb688729e22d9480b8a59c83aa5d"
-  integrity sha512-mA7WltTNV+kHaM8SkDExirvwH7/+IXPR8+2JSYa2ahKdP+mdatO9/vZuuTKMiBcPAk9zQ5gfAcbSOFwKQeQEIA==
+sync-message@^0.0.10:
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/sync-message/-/sync-message-0.0.10.tgz#ef325fc67c62d24ab10bb0eea79b28d3ba6be403"
+  integrity sha512-w4LF+xtmAtIqzMzwIRujitEd/lCnMrQ9rt0A0ZgQa5Vkt62GA4ZVf5s7A1l0QueBLdb5SyYb7VFWm6mTwu4YXQ==
 
 table@^6.0.9:
   version "6.8.0"
