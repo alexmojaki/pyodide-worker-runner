@@ -17,13 +17,13 @@ def find_imports_to_install(imports):
     return to_install
 
 async def install_imports(source_code_or_imports, message_callback=lambda *args: None):
-    if isinstance(source_code_or_imports, list):
-        imports = source_code_or_imports
-    else:
+    if isinstance(source_code_or_imports, str):
         try:
             imports = pyodide.find_imports(source_code_or_imports)
         except SyntaxError:
             return
+    else:
+        imports = source_code_or_imports
 
     to_install = find_imports_to_install(imports)
     if to_install:
