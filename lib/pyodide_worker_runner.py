@@ -34,17 +34,17 @@ async def install_imports(source_code_or_imports, message_callback=lambda *args:
         to_install_entries = [
             dict(module=mod, package=to_package_name.get(mod, mod)) for mod in to_install
         ]
-        import_cb("loading", to_install_entries)
+        import_cb("loading_all", to_install_entries)
         try:
             import micropip  # noqa
         except ModuleNotFoundError:
-            import_cb("loading", [dict(module="micropip", package="micropip")])
+            import_cb("loading_micropip", [dict(module="micropip", package="micropip")])
             await pyodide_js.loadPackage("micropip")
             import micropip  # noqa
-            import_cb("loaded", [dict(module="micropip", package="micropip")])
+            import_cb("loaded_micropip", [dict(module="micropip", package="micropip")])
 
         for entry in to_install:
-            import_cb("loading", entry)
+            import_cb("loading_one", entry)
             await micropip.install(entry["package"])
-            import_cb("loaded", entry)
-        import_cb("loaded", to_install_entries)
+            import_cb("loaded_one", entry)
+        import_cb("loaded_all", to_install_entries)
