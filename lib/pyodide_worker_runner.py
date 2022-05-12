@@ -16,23 +16,34 @@ def find_imports_to_install(imports):
             to_install.append(module)
     return to_install
 
-
-async def install_imports(source_code, message_callback=lambda *args: None):
-    try:
-        imports = pyodide.find_imports(source_code)
-    except SyntaxError:
-        return
+async def install_imports(source_code_or_imports, message_callback=lambda *args: None):
+    if isinstance(source_code_or_imports, list):
+        imports = source_code_or_imports
+    else:
+        try:
+            imports = pyodide.find_imports(source_code_or_imports)
+        except SyntaxError:
+            return
 
     to_install = find_imports_to_install(imports)
     if to_install:
+        def import_cb(typ, imports):
+            return message_callback(dict(type=typ, imports=imports))
         try:
             import micropip  # noqa
         except ModuleNotFoundError:
+            import_cb("loading", [dict(module="micropip", package="micropip")])
             await pyodide_js.loadPackage("micropip")
             import micropip  # noqa
-        module_names = ", ".join(to_install)
-        message_callback(f"Loading {module_names}")
+            import_cb("loaded", [dict(module="micropip", package="micropip")])
+
         to_package_name = pyodide_js._module._import_name_to_package_name.to_py()
-        packages_names = [to_package_name.get(mod, mod) for mod in to_install]
-        await micropip.install(packages_names)
-        message_callback(f"Loaded {module_names}")
+        to_install_entries = [
+            dict(module=mod, package=to_package_name.get(mod, mod)) for mod in to_install
+        ]
+        import_cb("loading", to_install_entries)
+        for entry in to_install:
+            import_cb("loading", entry)
+            await micropip.install(entry["package"])
+            import_cb("loaded", entry)
+        import_cb("loaded", to_install_entries)
