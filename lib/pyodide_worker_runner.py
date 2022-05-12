@@ -17,7 +17,7 @@ def find_imports_to_install(imports):
     return to_install
 
 
-async def install_imports(source_code):
+async def install_imports(source_code, message_callback=lambda *args: None):
     try:
         imports = pyodide.find_imports(source_code)
     except SyntaxError:
@@ -30,7 +30,9 @@ async def install_imports(source_code):
         except ModuleNotFoundError:
             await pyodide_js.loadPackage("micropip")
             import micropip  # noqa
-
+        module_names = ", ".join(to_install)
+        message_callback(f"Loading {module_names}")
         to_package_name = pyodide_js._module._import_name_to_package_name.to_py()
         packages_names = [to_package_name.get(mod, mod) for mod in to_install]
         await micropip.install(packages_names)
+        message_callback(f"Loaded {module_names}")
