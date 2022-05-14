@@ -40,7 +40,7 @@ async def install_imports(source_code_or_imports, message_callback=lambda *args:
             import micropip  # noqa
             message_callback("loaded_micropip", [dict(module="micropip", package="micropip")])
 
-        for entry in to_install:
+        for entry in to_install_entries:
             message_callback("loading_one", entry)
             await micropip.install(entry["package"])
             message_callback("loaded_one", entry)
