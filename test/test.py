@@ -22,7 +22,7 @@ def get_driver(caps):
     if browserstack_key:
         desired_capabilities = {
             **caps,
-            "browserstack.local": "true",
+            "browserstack.local": True,
             "build": build,
             "project": "pyodide-worker-runner",
             "browserstack.localIdentifier": local_identifier,
