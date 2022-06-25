@@ -46,7 +46,7 @@ jobs:
         with:
           local-testing: 'start'
           local-logging-level: 'all-logs'
-          local-identifier: 'random'
+          local-args: '--force --force-local'
       - name: Test
         run: |
           pip install pytest pytest-parallel selenium
