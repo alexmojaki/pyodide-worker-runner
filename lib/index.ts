@@ -1,32 +1,20 @@
 import pRetry from "p-retry";
 import {SyncClient, syncExpose, SyncExtras} from "comsync";
 import * as Comlink from "comlink";
+import {loadPyodide, PyodideInterface} from "pyodide";
 
 const pyodide_worker_runner_contents = require("!!raw-loader!./pyodide_worker_runner.py")
   .default;
 
-export declare interface Pyodide {
-  unpackArchive: (
-    buffer: ArrayBuffer,
-    format: string,
-    options?: {extractDir?: string},
-  ) => void;
-  pyimport: (name: string) => any;
-  registerComlink: any;
-  setInterruptBuffer: (buffer: Int32Array) => void;
-}
-declare function loadPyodide(options?: {indexURL: string}): Promise<Pyodide>;
-
-export type PyodideLoader = () => Promise<Pyodide>;
+export type PyodideLoader = () => Promise<PyodideInterface>;
 export interface PackageOptions {
   format: string;
   url: string;
   extractDir?: string;
 }
 
-export function defaultPyodideLoader(version = "0.20.0") {
-  importScripts(`https://cdn.jsdelivr.net/pyodide/v${version}/full/pyodide.js`);
-  return loadPyodide();
+export function defaultPyodideLoader(version = "0.21.0a2") {
+  return loadPyodide({indexURL: `https://cdn.jsdelivr.net/pyodide/v${version}/full/`});
 }
 
 export async function loadPyodideAndPackage(
@@ -36,7 +24,7 @@ export async function loadPyodideAndPackage(
   let {format, extractDir, url} = packageOptions;
   extractDir = extractDir || "/tmp/";
 
-  let pyodide: Pyodide;
+  let pyodide: PyodideInterface;
   let packageBuffer: ArrayBuffer;
   [pyodide, packageBuffer] = await Promise.all([
     pyodideLoader(),
@@ -53,7 +41,7 @@ export async function loadPyodideAndPackage(
   return pyodide;
 }
 
-export function initPyodide(pyodide: Pyodide) {
+export function initPyodide(pyodide: PyodideInterface) {
   pyodide.registerComlink(Comlink);
 
   const sys = pyodide.pyimport("sys");
