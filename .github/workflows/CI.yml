@@ -50,7 +50,7 @@ jobs:
           local-identifier: 'random'
       - name: Test
         run: |
-          pip install pytest pytest-parallel selenium==3.141.0
+          pip install pytest pytest-parallel selenium
           cd test
           ./package.sh
           ./test.sh
