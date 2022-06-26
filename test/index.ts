@@ -126,7 +126,7 @@ import time
 start = time.time()
 time.sleep(1)
 end = time.time()
-print(1 < end - start < 1.5)
+print(1 < end - start < 2)
 `,
     );
     await expect("stdout:True;stdout:\n;");
@@ -143,7 +143,7 @@ except BaseException as e:
 else:
   print('not!')
 end = time.time()
-print(end - start < 0.5)
+print(end - start < 1)
 `,
     );
     await asyncSleep(100);
