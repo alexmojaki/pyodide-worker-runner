@@ -105,6 +105,7 @@ def test_lib(caps, url):
 def _tests(driver, url):
     driver.get(url)
     sleep(10)  # Prevent NoSuchFrameException with Safari
+    driver.execute_script('browserstack_executor: {"action": "acceptSsl"}')
     elem = driver.find_element_by_id("result")
     text = elem.text
     print(text)
