@@ -8,6 +8,7 @@ import pytest
 from selenium import webdriver
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
 
 assets_dir = Path(__file__).parent / "test_assets"
 assets_dir.mkdir(exist_ok=True)
@@ -20,14 +21,23 @@ local_identifier = os.environ.get("BROWSERSTACK_LOCAL_IDENTIFIER")
 
 def get_driver(caps):
     if browserstack_key:
+        bstack = {
+                "os": caps["os"],
+                "osVersion": caps["os_version"],
+                "projectName": "pyodide-worker-runner",
+                "buildName": build,
+                "local": "true",
+                "networkLogs": "true",
+                "consoleLogs": "verbose",
+        }
+        if local_identifier:
+            bstack["localIdentifier"] = local_identifier
         desired_capabilities = {
             **caps,
-            "browserstack.local": "true",
-            "build": build,
-            "project": "pyodide-worker-runner",
-            "browserstack.localIdentifier": local_identifier,
+            'bstack:options': bstack,
             "browserstack.console": "verbose",
         }
+        print("desired_capabilities =", desired_capabilities)
         driver = webdriver.Remote(
             command_executor=f"https://{browserstack_username}:{browserstack_key}"
             f"@hub-cloud.browserstack.com/wd/hub",
@@ -51,20 +61,21 @@ def params():
     if browserstack_key:
         for os_name, extra_browser, os_versions in [
             ["Windows", "Edge", ["11"]],
-            ["OS X", "Safari", ["Big Sur"]],
+            ["OS X", "Safari", ["Monterey"]],
         ]:
             for browser in ["Chrome", "Firefox", extra_browser]:
-                if browser == "Firefox":
+                if browser in ["Firefox", "Safari"]:
                     url = "https://localhost:8001"
-                    acceptSslCerts = "true"
+                    acceptSslCerts = True
                 else:
                     url = "http://localhost:8000"
-                    acceptSslCerts = "false"
+                    acceptSslCerts = False
                 for os_version in os_versions:
                     caps = dict(
                         os=os_name,
                         os_version=os_version,
-                        browser=browser,
+                        browserName=browser,
+                        acceptInsecurecerts=acceptSslCerts,
                         acceptSslCerts=acceptSslCerts,
                     )
                     yield caps, url
@@ -104,7 +115,7 @@ def test_lib(caps, url):
 def _tests(driver, url):
     driver.get(url)
     sleep(10)  # Prevent NoSuchFrameException with Safari
-    elem = driver.find_element_by_id("result")
+    elem = driver.find_element(By.ID, "result")
     text = elem.text
     print(text)
     assert "PASSED" in text

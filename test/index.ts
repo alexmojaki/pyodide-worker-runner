@@ -64,7 +64,7 @@ async function runTests() {
       actual.result === expected.result &&
       actual.output === expected.output &&
       actual.prompt === expected.prompt;
-    console.log(output);
+    log(output);
     testResults.push({
       test,
       actual,
@@ -126,7 +126,7 @@ import time
 start = time.time()
 time.sleep(1)
 end = time.time()
-print(1 < end - start < 1.5)
+print(1 < end - start < 2)
 `,
     );
     await expect("stdout:True;stdout:\n;");
@@ -143,7 +143,7 @@ except BaseException as e:
 else:
   print('not!')
 end = time.time()
-print(end - start < 0.5)
+print(end - start < 1)
 `,
     );
     await asyncSleep(100);
@@ -211,7 +211,7 @@ else:
       `
 try:
   while True:
-    pass
+    str(3)
 except BaseException as e:
   print(type(e).__name__)
 else:
@@ -225,12 +225,20 @@ else:
 
   (window as any).testResults = testResults;
   console.log(testResults);
+  log(JSON.stringify(testResults));
 
   let numPassed = testResults.filter((t) => t.passed).length;
   let numTotal = testResults.length;
   let finalResult = numPassed === numTotal ? "PASSED" : "FAILED";
-  const body = document.getElementsByTagName("body")[0];
-  body.innerHTML = `<div id=result>${numPassed} / ${numTotal} : ${finalResult}!</div>`;
+  body.innerHTML = `<h1 id=result>${numPassed} / ${numTotal} : ${finalResult}!</h1>` + body.innerHTML;
 }
 
-runTests();
+const body = document.getElementsByTagName("body")[0];
+function log(text: string) {
+  console.log(text);
+  const elem = document.createElement("pre");
+  elem.textContent = text;
+  body.appendChild(elem);
+}
+
+runTests().catch(log);

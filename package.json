@@ -82,6 +82,7 @@
     "lodash": "^4.17.21",
     "prettier": "2.1.2",
     "prettier-plugin-packagejson": "2.2.13",
+    "pyodide": "^0.21.0-alpha.2",
     "raw-loader": "^4.0.2",
     "sync-message": "^0.0.10",
     "ts-loader": "^9.2.6",
@@ -93,6 +94,7 @@
     "worker-loader": "^3.0.8"
   },
   "peerDependencies": {
-    "comsync": "*"
+    "comsync": "*",
+    "pyodide": "^0.21.0-alpha.2"
   }
 }

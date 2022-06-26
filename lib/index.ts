@@ -1,61 +1,47 @@
 import pRetry from "p-retry";
-import {syncExpose, SyncExtras, SyncClient} from "comsync";
+import {SyncClient, syncExpose, SyncExtras} from "comsync";
 import * as Comlink from "comlink";
+import {loadPyodide, PyodideInterface} from "pyodide";
 
 const pyodide_worker_runner_contents = require("!!raw-loader!./pyodide_worker_runner.py")
   .default;
 
-export declare interface Pyodide {
-  unpackArchive: (
-    buffer: ArrayBuffer,
-    format: string,
-    extract_dir?: string,
-  ) => void;
-  pyimport: (name: string) => any;
-  registerComlink: any;
-  setInterruptBuffer: (buffer: Int32Array) => void;
-}
-declare function loadPyodide(options: {indexURL: string}): Promise<Pyodide>;
-
-export type PyodideLoader = () => Promise<Pyodide>;
+export type PyodideLoader = () => Promise<PyodideInterface>;
 export interface PackageOptions {
   format: string;
   url: string;
-  extract_dir?: string;
+  extractDir?: string;
 }
 
-export function defaultPyodideLoader(version = "0.19.1") {
-  const indexURL = `https://cdn.jsdelivr.net/pyodide/v${version}/full/`;
-  importScripts(indexURL + "pyodide.js");
-  return loadPyodide({indexURL});
+export function defaultPyodideLoader(version = "0.21.0a2") {
+  return loadPyodide({indexURL: `https://cdn.jsdelivr.net/pyodide/v${version}/full/`});
 }
 
 export async function loadPyodideAndPackage(
   packageOptions: PackageOptions,
   pyodideLoader: PyodideLoader = defaultPyodideLoader,
 ) {
-  const {format, extract_dir, url} = packageOptions;
+  let {format, extractDir, url} = packageOptions;
+  extractDir = extractDir || "/tmp/";
 
-  let pyodide: Pyodide;
+  let pyodide: PyodideInterface;
   let packageBuffer: ArrayBuffer;
   [pyodide, packageBuffer] = await Promise.all([
     pyodideLoader(),
     pRetry(() => getPackageBuffer(url), {retries: 3}),
   ]);
 
-  pyodide.unpackArchive(packageBuffer, format, extract_dir);
-  const sys = pyodide.pyimport("sys");
+  pyodide.unpackArchive(packageBuffer, format, {extractDir});
 
-  if (extract_dir) {
-    sys.path.append(extract_dir);
-  }
+  const sys = pyodide.pyimport("sys");
+  sys.path.append(extractDir);
 
   initPyodide(pyodide);
 
   return pyodide;
 }
 
-export function initPyodide(pyodide: Pyodide) {
+export function initPyodide(pyodide: PyodideInterface) {
   pyodide.registerComlink(Comlink);
 
   const sys = pyodide.pyimport("sys");

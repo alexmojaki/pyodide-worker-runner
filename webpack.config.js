@@ -27,5 +27,6 @@ module.exports = {
     comlink: "comlink",
     "sync-message": "sync-message",
     comsync: "comsync",
+    pyodide: "pyodide",
   },
 };
