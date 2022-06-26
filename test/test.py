@@ -55,7 +55,7 @@ def params():
             ["OS X", "Safari", ["Monterey"]],
         ]:
             for browser in ["Chrome", "Firefox", extra_browser]:
-                if browser == "Firefox":
+                if browser in ["Firefox", "Safari"]:
                     url = "https://localhost:8001"
                     acceptSslCerts = "true"
                 else:
