@@ -211,7 +211,7 @@ else:
       `
 try:
   while True:
-    str(3)
+    pass
 except BaseException as e:
   print(type(e).__name__)
 else:
