@@ -13,7 +13,7 @@ export interface PackageOptions {
   extractDir?: string;
 }
 
-export function defaultPyodideLoader(version = "0.21.0a2") {
+export function defaultPyodideLoader(version = "0.21.0") {
   return loadPyodide({indexURL: `https://cdn.jsdelivr.net/pyodide/v${version}/full/`});
 }
 
