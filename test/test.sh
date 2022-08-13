@@ -12,4 +12,4 @@ curl -k http://localhost:8000
 curl -k https://localhost:8001
 curl -k https://localhost:8002
 
-pytest --tests-per-worker 6 test.py
+pytest --tests-per-worker 2 test.py
