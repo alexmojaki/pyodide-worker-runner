@@ -29,6 +29,9 @@ def get_driver(caps):
                 "local": "true",
                 "networkLogs": "true",
                 "consoleLogs": "verbose",
+            "debug": "true",
+            "seleniumLogs": "true",
+            "appiumLogs": "true",
         }
         if local_identifier:
             bstack["localIdentifier"] = local_identifier
@@ -64,8 +67,11 @@ def params():
             ["OS X", "Safari", ["Monterey"]],
         ]:
             for browser in ["Chrome", "Firefox", extra_browser]:
-                if browser in ["Firefox", "Safari"]:
+                if browser in ["Firefox"]:
                     url = "https://localhost:8001"
+                    acceptSslCerts = True
+                elif browser in ["Safari"]:
+                    url = "https://localhost:8002"
                     acceptSslCerts = True
                 else:
                     url = "http://localhost:8000"
