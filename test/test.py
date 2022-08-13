@@ -40,7 +40,6 @@ def get_driver(caps):
             'bstack:options': bstack,
             "browserstack.console": "verbose",
         }
-        print("desired_capabilities =", desired_capabilities)
         driver = webdriver.Remote(
             command_executor=f"https://{browserstack_username}:{browserstack_key}"
             f"@hub-cloud.browserstack.com/wd/hub",
