@@ -46,7 +46,6 @@ jobs:
         with:
           local-testing: 'start'
           local-logging-level: 'all-logs'
-          local-args: '--force --force-local'
           local-identifier: 'random'
       - name: Test
         run: |
