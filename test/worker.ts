@@ -26,12 +26,12 @@ Comlink.expose({
         other: (type, data) => type + "-" + JSON.stringify(data),
       });
       const pyodide = await pyodidePromise;
-      if (extras.interruptBuffer) {
-        pyodide.setInterruptBuffer(extras.interruptBuffer);
-      }
       const runner = pyodide.pyimport("python_runner").PyodideRunner();
       runner.set_callback(callback);
       pyodide.pyimport("builtins").runner = runner;
+      if (extras.interruptBuffer) {
+        pyodide.setInterruptBuffer(extras.interruptBuffer);
+      }
       runner.run(code);
       return "success";
     },
