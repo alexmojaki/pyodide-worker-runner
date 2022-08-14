@@ -126,7 +126,7 @@ import time
 start = time.time()
 time.sleep(1)
 end = time.time()
-if end - start <= 1:
+if end - start >= 1:
   print(True)
 else:
   print(start, end, end - start)
