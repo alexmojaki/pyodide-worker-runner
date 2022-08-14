@@ -53,7 +53,7 @@ async function runTests() {
 
   async function expect(expectedOutput: string) {
     const result = await resultPromise;
-    await asyncSleep(100);
+    await asyncSleep(250);
     const actual = {result, output, prompt};
     let expected: typeof actual = {
       output: expectedOutput,
@@ -94,7 +94,7 @@ async function runTests() {
 
     test = "test_input";
     runCode("print(int(input('hi')))", "hi");
-    await asyncSleep(100);
+    await asyncSleep(250);
     await client.writeMessage("456");
     await expect(`input_prompt:hi;input:456
 ;stdout:456;stdout:
@@ -112,7 +112,7 @@ else:
 `,
       "interrupt me",
     );
-    await asyncSleep(100);
+    await asyncSleep(250);
     await client.interrupt();
     await expect(
       `input_prompt:interrupt me;stdout:KeyboardInterrupt
@@ -152,7 +152,7 @@ else:
   print(start, end, end - start)
 `,
     );
-    await asyncSleep(100);
+    await asyncSleep(250);
     await client.interrupt();
     await expect(
       `stdout:KeyboardInterrupt
@@ -224,7 +224,7 @@ else:
   print('not!')
 `,
     );
-    await asyncSleep(100);
+    await asyncSleep(250);
     await client.interrupt();
     await expect("stdout:KeyboardInterrupt\n;");
   }
