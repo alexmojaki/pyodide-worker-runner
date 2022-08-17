@@ -13,8 +13,22 @@ export interface PackageOptions {
   extractDir?: string;
 }
 
-export function defaultPyodideLoader(version = "0.21.0") {
-  return loadPyodide({indexURL: `https://cdn.jsdelivr.net/pyodide/v${version}/full/`});
+export function defaultPyodideLoader(version?: string) {
+  if (!version) {
+    version = typeof BigInt64Array !== "undefined" ? "0.21.0" : "0.19.1";
+  }
+  const indexURL = `https://cdn.jsdelivr.net/pyodide/v${version}/full/`;
+  const vInfo = versionInfo(version);
+  if (!(vInfo[0] === 0 && vInfo[1] === 21)) {
+    importScripts(indexURL + "pyodide.js");
+    return (self as any).loadPyodide({indexURL});
+  } else {
+    return loadPyodide({indexURL});
+  }
+}
+
+export function versionInfo(version: string) {
+  return version.split(".").map(Number);
 }
 
 export async function loadPyodideAndPackage(
@@ -31,7 +45,12 @@ export async function loadPyodideAndPackage(
     pRetry(() => getPackageBuffer(url), {retries: 3}),
   ]);
 
-  pyodide.unpackArchive(packageBuffer, format, {extractDir});
+  const vInfo = versionInfo(pyodide.version);
+  pyodide.unpackArchive(
+    packageBuffer,
+    format,
+    vInfo[0] === 0 && vInfo[1] <= 19 ? (extractDir as any) : {extractDir},
+  );
 
   const sys = pyodide.pyimport("sys");
   sys.path.append(extractDir);
