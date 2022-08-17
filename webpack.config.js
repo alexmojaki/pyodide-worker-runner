@@ -21,11 +21,13 @@ module.exports = {
   },
   resolve: {
     extensions: [".ts", ".js", ".d.ts"],
+    fallback: {url: false},
   },
   devtool: "source-map",
   externals: {
     comlink: "comlink",
     "sync-message": "sync-message",
     comsync: "comsync",
+    pyodide: "pyodide",
   },
 };

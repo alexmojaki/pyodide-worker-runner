@@ -8,7 +8,11 @@ sys.setrecursionlimit(500)
 
 
 def find_imports_to_install(imports):
-    to_package_name = pyodide_js._module._import_name_to_package_name.to_py()
+    try:
+        to_package_name = pyodide_js._module._import_name_to_package_name.to_py()
+    except AttributeError:
+        to_package_name = pyodide_js._api._import_name_to_package_name.to_py()
+
     to_install = []
     for module in imports:
         try:
@@ -16,6 +20,7 @@ def find_imports_to_install(imports):
         except ModuleNotFoundError:
             to_install.append(dict(module=module, package=to_package_name.get(module, module)))
     return to_install
+
 
 async def install_imports(source_code_or_imports, message_callback=lambda *args: None):
     if isinstance(source_code_or_imports, str):

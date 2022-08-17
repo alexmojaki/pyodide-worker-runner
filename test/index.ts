@@ -53,7 +53,7 @@ async function runTests() {
 
   async function expect(expectedOutput: string) {
     const result = await resultPromise;
-    await asyncSleep(100);
+    await asyncSleep(250);
     const actual = {result, output, prompt};
     let expected: typeof actual = {
       output: expectedOutput,
@@ -64,7 +64,7 @@ async function runTests() {
       actual.result === expected.result &&
       actual.output === expected.output &&
       actual.prompt === expected.prompt;
-    console.log(output);
+    log(output);
     testResults.push({
       test,
       actual,
@@ -84,6 +84,22 @@ async function runTests() {
     prompt = p;
   };
 
+  test = "test_import_install";
+  runCode(`import cheap_repr; print(cheap_repr.cheap_repr(list(range(1000))))`);
+  await expect(
+    'loading_all:[{"module":"cheap_repr","package":"cheap_repr"}];' +
+      'loading_micropip:{"module":"micropip","package":"micropip"};' +
+      'loaded_micropip:{"module":"micropip","package":"micropip"};' +
+      'loading_one:{"module":"cheap_repr","package":"cheap_repr"};' +
+      'loaded_one:{"module":"cheap_repr","package":"cheap_repr"};' +
+      'loaded_all:[{"module":"cheap_repr","package":"cheap_repr"}];' +
+      "stdout:[0, 1, 2, ..., 997, 998, 999]\n;",
+  );
+
+  test = "test_import_install2";
+  runCode(`import cheap_repr; print(cheap_repr.cheap_repr(list(range(1000))))`);
+  await expect("stdout:[0, 1, 2, ..., 997, 998, 999]\n;");
+
   for (const channel of channels) {
     channelType = channel.type;
     client.channel = channel;
@@ -94,7 +110,7 @@ async function runTests() {
 
     test = "test_input";
     runCode("print(int(input('hi')))", "hi");
-    await asyncSleep(100);
+    await asyncSleep(250);
     await client.writeMessage("456");
     await expect(`input_prompt:hi;input:456
 ;stdout:456;stdout:
@@ -103,6 +119,7 @@ async function runTests() {
     test = "test_interrupt_input";
     runCode(
       `
+print(int(input('hi2')))
 try:
   input('interrupt me')
 except BaseException as e:
@@ -112,10 +129,14 @@ else:
 `,
       "interrupt me",
     );
-    await asyncSleep(100);
+    await asyncSleep(250);
+    await client.writeMessage("789");
+    await asyncSleep(250);
     await client.interrupt();
     await expect(
-      `input_prompt:interrupt me;stdout:KeyboardInterrupt
+      `input_prompt:hi2;input:789
+;stdout:789;stdout:
+;input_prompt:interrupt me;stdout:KeyboardInterrupt
 ;`,
     );
 
@@ -126,7 +147,10 @@ import time
 start = time.time()
 time.sleep(1)
 end = time.time()
-print(1 < end - start < 1.5)
+if end - start >= 1:
+  print(True)
+else:
+  print(start, end, end - start)
 `,
     );
     await expect("stdout:True;stdout:\n;");
@@ -137,16 +161,19 @@ print(1 < end - start < 1.5)
 import time
 start = time.time()
 try:
-  time.sleep(2)
+  time.sleep(4)
 except BaseException as e:
   print(type(e).__name__)
 else:
   print('not!')
 end = time.time()
-print(end - start < 0.5)
+if end - start <= 2:
+  print(True)
+else:
+  print(start, end, end - start)
 `,
     );
-    await asyncSleep(100);
+    await asyncSleep(250);
     await client.interrupt();
     await expect(
       `stdout:KeyboardInterrupt
@@ -218,19 +245,29 @@ else:
   print('not!')
 `,
     );
-    await asyncSleep(100);
+    await asyncSleep(250);
     await client.interrupt();
     await expect("stdout:KeyboardInterrupt\n;");
   }
 
   (window as any).testResults = testResults;
   console.log(testResults);
+  log(JSON.stringify(testResults));
 
   let numPassed = testResults.filter((t) => t.passed).length;
   let numTotal = testResults.length;
   let finalResult = numPassed === numTotal ? "PASSED" : "FAILED";
-  const body = document.getElementsByTagName("body")[0];
-  body.innerHTML = `<div id=result>${numPassed} / ${numTotal} : ${finalResult}!</div>`;
+  body.innerHTML =
+    `<h1 id=result>${numPassed} / ${numTotal} : ${finalResult}!</h1>` +
+    body.innerHTML;
 }
 
-runTests();
+const body = document.getElementsByTagName("body")[0];
+function log(text: string) {
+  console.log(text);
+  const elem = document.createElement("pre");
+  elem.textContent = text;
+  body.appendChild(elem);
+}
+
+runTests().catch(log);
