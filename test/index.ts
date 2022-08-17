@@ -241,7 +241,9 @@ else:
   let numPassed = testResults.filter((t) => t.passed).length;
   let numTotal = testResults.length;
   let finalResult = numPassed === numTotal ? "PASSED" : "FAILED";
-  body.innerHTML = `<h1 id=result>${numPassed} / ${numTotal} : ${finalResult}!</h1>` + body.innerHTML;
+  body.innerHTML =
+    `<h1 id=result>${numPassed} / ${numTotal} : ${finalResult}!</h1>` +
+    body.innerHTML;
 }
 
 const body = document.getElementsByTagName("body")[0];
