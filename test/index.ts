@@ -103,6 +103,7 @@ async function runTests() {
     test = "test_interrupt_input";
     runCode(
       `
+print(int(input('hi2')))
 try:
   input('interrupt me')
 except BaseException as e:
@@ -113,9 +114,13 @@ else:
       "interrupt me",
     );
     await asyncSleep(250);
+    await client.writeMessage("789");
+    await asyncSleep(250);
     await client.interrupt();
     await expect(
-      `input_prompt:interrupt me;stdout:KeyboardInterrupt
+      `input_prompt:hi2;input:789
+;stdout:789;stdout:
+;input_prompt:interrupt me;stdout:KeyboardInterrupt
 ;`,
     );
 
