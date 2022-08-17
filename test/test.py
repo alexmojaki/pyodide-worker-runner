@@ -63,19 +63,19 @@ def params():
     if browserstack_key:
         for os_name, extra_browser, os_versions in [
             ["Windows", "Edge", ["11"]],
-            ["OS X", "Safari", ["Monterey"]],
+            ["OS X", "Safari", ["Monterey", "Big Sur"]],
         ]:
-            for browser in ["Chrome", "Firefox", extra_browser]:
-                if browser in ["Firefox"]:
-                    url = "https://localhost:8001"
-                    acceptSslCerts = True
-                elif browser in ["Safari"]:
-                    url = "https://localhost:8002"
-                    acceptSslCerts = True
-                else:
-                    url = "http://localhost:8000"
-                    acceptSslCerts = False
-                for os_version in os_versions:
+            for os_version in os_versions:
+                for browser in ["Chrome", "Firefox", extra_browser]:
+                    if browser in ["Safari"] and os_version == "Monterey":
+                        url = "https://localhost:8002"
+                        acceptSslCerts = True
+                    elif browser in ["Firefox", "Safari"]:
+                        url = "https://localhost:8001"
+                        acceptSslCerts = True
+                    else:
+                        url = "http://localhost:8000"
+                        acceptSslCerts = False
                     caps = dict(
                         os=os_name,
                         os_version=os_version,
