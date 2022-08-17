@@ -32,7 +32,14 @@ Comlink.expose({
       await pyodide
         .pyimport("pyodide_worker_runner")
         .install_imports(code, (typ: string, data: any) =>
-          outputCallback([{type: typ, text: JSON.stringify(data.toJs({dict_converter: Object.fromEntries}))}]),
+          outputCallback([
+            {
+              type: typ,
+              text: JSON.stringify(
+                data.toJs({dict_converter: Object.fromEntries}),
+              ),
+            },
+          ]),
         );
       if (extras.interruptBuffer) {
         pyodide.setInterruptBuffer(extras.interruptBuffer);

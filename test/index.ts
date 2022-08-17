@@ -84,20 +84,21 @@ async function runTests() {
     prompt = p;
   };
 
-  test = "test_import_install"
+  test = "test_import_install";
   runCode(`import cheap_repr; print(cheap_repr.cheap_repr(list(range(1000))))`);
   await expect(
     'loading_all:[{"module":"cheap_repr","package":"cheap_repr"}];' +
-    'loading_micropip:{"module":"micropip","package":"micropip"};' +
-    'loaded_micropip:{"module":"micropip","package":"micropip"};' +
-    'loading_one:{"module":"cheap_repr","package":"cheap_repr"};' +
-    'loaded_one:{"module":"cheap_repr","package":"cheap_repr"};' +
-    'loaded_all:[{"module":"cheap_repr","package":"cheap_repr"}];' +
-    'stdout:[0, 1, 2, ..., 997, 998, 999]\n;');
+      'loading_micropip:{"module":"micropip","package":"micropip"};' +
+      'loaded_micropip:{"module":"micropip","package":"micropip"};' +
+      'loading_one:{"module":"cheap_repr","package":"cheap_repr"};' +
+      'loaded_one:{"module":"cheap_repr","package":"cheap_repr"};' +
+      'loaded_all:[{"module":"cheap_repr","package":"cheap_repr"}];' +
+      "stdout:[0, 1, 2, ..., 997, 998, 999]\n;",
+  );
 
-  test = "test_import_install2"
+  test = "test_import_install2";
   runCode(`import cheap_repr; print(cheap_repr.cheap_repr(list(range(1000))))`);
-  await expect('stdout:[0, 1, 2, ..., 997, 998, 999]\n;');
+  await expect("stdout:[0, 1, 2, ..., 997, 998, 999]\n;");
 
   for (const channel of channels) {
     channelType = channel.type;
