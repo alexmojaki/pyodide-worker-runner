@@ -29,6 +29,11 @@ Comlink.expose({
       const runner = pyodide.pyimport("python_runner").PyodideRunner();
       runner.set_callback(callback);
       pyodide.pyimport("builtins").runner = runner;
+      await pyodide
+        .pyimport("pyodide_worker_runner")
+        .install_imports(code, (typ: string, data: any) =>
+          outputCallback([{type: typ, text: JSON.stringify(data.toJs({dict_converter: Object.fromEntries}))}]),
+        );
       if (extras.interruptBuffer) {
         pyodide.setInterruptBuffer(extras.interruptBuffer);
       }
