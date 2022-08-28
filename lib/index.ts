@@ -13,18 +13,15 @@ export interface PackageOptions {
   extractDir?: string;
 }
 
-export function defaultPyodideLoader(version?: string) {
-  if (!version) {
-    version = typeof BigInt64Array !== "undefined" ? "0.21.0" : "0.19.1";
-  }
+export async function defaultPyodideLoader(version: string = "0.21.1") {
   const indexURL = `https://cdn.jsdelivr.net/pyodide/v${version}/full/`;
-  const vInfo = versionInfo(version);
-  if (!(vInfo[0] === 0 && vInfo[1] === 21)) {
-    importScripts(indexURL + "pyodide.js");
-    return (self as any).loadPyodide({indexURL});
-  } else {
-    return loadPyodide({indexURL});
+  const result = await loadPyodide({indexURL});
+  if (result.version !== version) {
+    throw new Error(
+      `loadPyodide loaded version ${result.version} instead of ${version}`,
+    );
   }
+  return result;
 }
 
 export function versionInfo(version: string) {
