@@ -232,6 +232,21 @@ else:
       "stdout:\n;",
   );
 
+  test = "recursion_error";
+  runCode(
+    `
+def f():
+  f()
+try:
+  f()
+except BaseException as e:
+  print(type(e).__name__)
+`,
+  );
+  await expect(
+    "stdout:RecursionError\n;",
+  );
+
   if (hasSAB) {
     test = "test_interrupt";
     runCode(
