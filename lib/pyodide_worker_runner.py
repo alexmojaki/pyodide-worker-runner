@@ -4,7 +4,7 @@ import sys
 import pyodide  # noqa
 import pyodide_js  # noqa
 
-sys.setrecursionlimit(500)
+sys.setrecursionlimit(400)
 
 
 def find_imports_to_install(imports):
