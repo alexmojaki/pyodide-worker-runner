@@ -62,7 +62,7 @@ def get_driver(caps):
 def params():
     if browserstack_key:
         for os_name, extra_browser, os_versions in [
-            ["Windows", "Edge", ["11"]],
+            ["Windows", "Edge", ["11", "10"]],
             ["OS X", "Safari", ["Monterey", "Big Sur"]],
         ]:
             for os_version in os_versions:

@@ -232,6 +232,21 @@ else:
       "stdout:\n;",
   );
 
+  test = "recursion_error";
+  runCode(
+    `
+def f():
+  f()
+try:
+  f()
+except BaseException as e:
+  print(type(e).__name__)
+`,
+  );
+  await expect(
+    "stdout:RecursionError\n;",
+  );
+
   if (hasSAB) {
     test = "test_interrupt";
     runCode(
@@ -259,6 +274,7 @@ else:
   let finalResult = numPassed === numTotal ? "PASSED" : "FAILED";
   body.innerHTML =
     `<h1 id=result>${numPassed} / ${numTotal} : ${finalResult}!</h1>` +
+    `<pre>${JSON.stringify(testResults.filter(t => !t.passed), null, 2)}</pre>` +
     body.innerHTML;
 }
 
