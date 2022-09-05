@@ -13,7 +13,7 @@ export interface PackageOptions {
   extractDir?: string;
 }
 
-export async function defaultPyodideLoader(version: string = "0.21.1") {
+export async function defaultPyodideLoader(version: string = "0.21.2") {
   const indexURL = `https://cdn.jsdelivr.net/pyodide/v${version}/full/`;
   const result = await loadPyodide({indexURL});
   if (result.version !== version) {
