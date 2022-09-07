@@ -7,11 +7,26 @@ import {
   makeRunnerCallback,
   pyodideExpose,
   RunnerCallbacks,
+  defaultPyodideLoader,
 } from "../lib";
 import * as Comlink from "comlink";
+import {PyodideInterface} from "pyodide";
 
 const packageUrl = require("url-loader!./package.tar").default;
-const pyodidePromise = loadPyodideAndPackage({url: packageUrl, format: "tar"});
+
+let attempt = 0;
+
+async function loader(): Promise<PyodideInterface> {
+  console.log("pyodide load attempt " + attempt);
+  if (attempt < 2) {
+    attempt++;
+    return await defaultPyodideLoader("badversion");
+  } else {
+    return await defaultPyodideLoader();
+  }
+}
+
+const pyodidePromise = loadPyodideAndPackage({url: packageUrl, format: "tar"}, loader);
 Comlink.expose({
   test: pyodideExpose(
     async (
