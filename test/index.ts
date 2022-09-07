@@ -84,6 +84,21 @@ async function runTests() {
     prompt = p;
   };
 
+  test = "test_fatal_error";
+  runCode(`
+import sys
+sys.setrecursionlimit(100000)
+def f():
+    f()
+f()
+ `)
+  try {
+    await resultPromise;
+    testResults.push({test, passed: false});
+  } catch (e) {
+    testResults.push({test, passed: true});
+  }
+
   test = "test_import_install";
   runCode(`import cheap_repr; print(cheap_repr.cheap_repr(list(range(1000))))`);
   await expect(

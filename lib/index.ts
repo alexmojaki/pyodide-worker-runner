@@ -72,14 +72,24 @@ export function initPyodide(pyodide: PyodideInterface) {
   pyodide.pyimport("pyodide_worker_runner");
 }
 
+const packageCache = new Map<string, ArrayBuffer>();
+
 async function getPackageBuffer(url: string) {
+  if (packageCache.has(url)) {
+    console.log("Loaded package from cache");
+    return packageCache.get(url);
+  }
+  console.log("Fetching package from " + url.slice(0, 100) + "...");
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(
       `Request for package failed with status ${response.status}: ${response.statusText}`,
     );
   }
-  return await response.arrayBuffer();
+  const result = await response.arrayBuffer();
+  console.log("Fetched package");
+  packageCache.set(url, result);
+  return result;
 }
 
 export interface OutputPart {
@@ -145,5 +155,25 @@ export class PyodideClient<T = any> extends SyncClient<T> {
     }
 
     return super.call(proxyMethod, interruptBuffer, ...args);
+  }
+}
+
+export class PyodideFatalErrorReloader {
+  private pyodidePromise: Promise<PyodideInterface>;
+
+  constructor(private readonly loader: PyodideLoader) {
+    this.pyodidePromise = loader();
+  }
+
+  public async withPyodide<T>(fn: (pyodide: PyodideInterface) => Promise<T>): Promise<T> {
+    const pyodide = await this.pyodidePromise;
+    try {
+      return await fn(pyodide);
+    } catch (e) {
+      if (e.pyodide_fatal_error) {
+        this.pyodidePromise = this.loader();
+      }
+      throw e;
+    }
   }
 }

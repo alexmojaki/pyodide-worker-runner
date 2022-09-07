@@ -8,6 +8,7 @@ import {
   pyodideExpose,
   RunnerCallbacks,
   defaultPyodideLoader,
+  PyodideFatalErrorReloader,
 } from "../lib";
 import * as Comlink from "comlink";
 import {PyodideInterface} from "pyodide";
@@ -26,7 +27,9 @@ async function loader(): Promise<PyodideInterface> {
   }
 }
 
-const pyodidePromise = loadPyodideAndPackage({url: packageUrl, format: "tar"}, loader);
+const fullLoader = () => loadPyodideAndPackage({url: packageUrl, format: "tar"}, loader);
+const reloader = new PyodideFatalErrorReloader(fullLoader);
+
 Comlink.expose({
   test: pyodideExpose(
     async (
@@ -40,27 +43,29 @@ Comlink.expose({
         output: outputCallback,
         other: (type, data) => type + "-" + JSON.stringify(data),
       });
-      const pyodide = await pyodidePromise;
-      const runner = pyodide.pyimport("python_runner").PyodideRunner();
-      runner.set_callback(callback);
-      pyodide.pyimport("builtins").runner = runner;
-      await pyodide
-        .pyimport("pyodide_worker_runner")
-        .install_imports(code, (typ: string, data: any) =>
-          outputCallback([
-            {
-              type: typ,
-              text: JSON.stringify(
-                data.toJs({dict_converter: Object.fromEntries}),
-              ),
-            },
-          ]),
-        );
-      if (extras.interruptBuffer) {
-        pyodide.setInterruptBuffer(extras.interruptBuffer);
-      }
-      runner.run(code);
-      return "success";
+
+      return await reloader.withPyodide(async (pyodide) => {
+        const runner = pyodide.pyimport("python_runner").PyodideRunner();
+        runner.set_callback(callback);
+        pyodide.pyimport("builtins").runner = runner;
+        await pyodide
+          .pyimport("pyodide_worker_runner")
+          .install_imports(code, (typ: string, data: any) =>
+            outputCallback([
+              {
+                type: typ,
+                text: JSON.stringify(
+                  data.toJs({dict_converter: Object.fromEntries}),
+                ),
+              },
+            ]),
+          );
+        if (extras.interruptBuffer) {
+          pyodide.setInterruptBuffer(extras.interruptBuffer);
+        }
+        runner.run(code);
+        return "success";
+      });
     },
   ),
 });
