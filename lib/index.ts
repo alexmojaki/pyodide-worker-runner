@@ -38,7 +38,7 @@ export async function loadPyodideAndPackage(
   let pyodide: PyodideInterface;
   let packageBuffer: ArrayBuffer;
   [pyodide, packageBuffer] = await Promise.all([
-    pRetry(pyodideLoader, {retries: 3}),
+    pRetry(() => pyodideLoader(), {retries: 3}),
     pRetry(() => getPackageBuffer(url), {retries: 3}),
   ]);
 
