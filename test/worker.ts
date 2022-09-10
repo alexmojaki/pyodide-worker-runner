@@ -27,7 +27,8 @@ async function loader(): Promise<PyodideInterface> {
   }
 }
 
-const fullLoader = () => loadPyodideAndPackage({url: packageUrl, format: "tar"}, loader);
+const fullLoader = () =>
+  loadPyodideAndPackage({url: packageUrl, format: "tar"}, loader);
 const reloader = new PyodideFatalErrorReloader(fullLoader);
 
 Comlink.expose({

@@ -165,7 +165,9 @@ export class PyodideFatalErrorReloader {
     this.pyodidePromise = loader();
   }
 
-  public async withPyodide<T>(fn: (pyodide: PyodideInterface) => Promise<T>): Promise<T> {
+  public async withPyodide<T>(
+    fn: (pyodide: PyodideInterface) => Promise<T>,
+  ): Promise<T> {
     const pyodide = await this.pyodidePromise;
     try {
       return await fn(pyodide);
