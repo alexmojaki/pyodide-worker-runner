@@ -1,7 +1,7 @@
 import pRetry from "p-retry";
 import {SyncClient, syncExpose, SyncExtras} from "comsync";
 import * as Comlink from "comlink";
-import {loadPyodide, PyodideInterface} from "pyodide";
+import {loadPyodide, PyodideInterface, version as npmVersion} from "pyodide";
 
 const pyodide_worker_runner_contents = require("!!raw-loader!./pyodide_worker_runner.py")
   .default;
@@ -13,7 +13,7 @@ export interface PackageOptions {
   extractDir?: string;
 }
 
-export async function defaultPyodideLoader(version: string = "0.21.2") {
+export async function defaultPyodideLoader(version: string = npmVersion) {
   const indexURL = `https://cdn.jsdelivr.net/pyodide/v${version}/full/`;
   const result = await loadPyodide({indexURL});
   if (result.version !== version) {
