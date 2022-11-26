@@ -93,7 +93,6 @@ def test_lib(caps, url):
 
 def _tests(driver, url):
     driver.get(url)
-    return  # TODO
     elem = driver.find_element(By.ID, "result")
     text = elem.text
     print(text)
