@@ -18,7 +18,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: 3.10
       - name: Read Node.js version to install from `.nvmrc`
         run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
         id: nvm
@@ -36,24 +36,20 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
       - name: Yarn install
         run: yarn --frozen-lockfile
-      - name: 'BrowserStack Env Setup'
-        uses: 'browserstack/github-actions/setup-env@master'
+      - name: Saucelabs tunnel
+        uses: saucelabs/sauce-connect-action@v2
         with:
-          username: ${{ secrets.BROWSERSTACK_USERNAME }}
-          access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
-      - name: 'Start BrowserStackLocal Tunnel'
-        uses: 'browserstack/github-actions/setup-local@master'
-        with:
-          local-testing: 'start'
-          local-logging-level: 'all-logs'
-          local-identifier: 'random'
+            username: ${{ secrets.SAUCE_USERNAME }}
+            accessKey: ${{ secrets.SAUCE_ACCESS_KEY }}
+            tunnelName: github-action-tunnel
       - name: Test
+        env:
+          SAUCE_TUNNEL: github-action-tunnel
+          SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
+          SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+          BUILD_NAME: ${{ github.event.head_commit.message }}
         run: |
           pip install pytest pytest-parallel py selenium!=4.4.1
           cd test
           ./package.sh
           ./test.sh
-      - name: 'Stop BrowserStackLocal'
-        uses: 'browserstack/github-actions/setup-local@master'
-        with:
-          local-testing: 'stop'

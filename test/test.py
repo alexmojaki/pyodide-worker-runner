@@ -1,8 +1,6 @@
-import json
 import os
 from datetime import datetime
 from pathlib import Path
-from time import sleep
 
 import pytest
 from selenium import webdriver
@@ -13,36 +11,25 @@ from selenium.webdriver.common.by import By
 assets_dir = Path(__file__).parent / "test_assets"
 assets_dir.mkdir(exist_ok=True)
 
-browserstack_username = os.environ.get("BROWSERSTACK_USERNAME")
-browserstack_key = os.environ.get("BROWSERSTACK_ACCESS_KEY")
-build = os.environ.get("BROWSERSTACK_BUILD_NAME", str(datetime.now()))
-local_identifier = os.environ.get("BROWSERSTACK_LOCAL_IDENTIFIER")
+sauce_tunnel = os.environ.get("SAUCE_TUNNEL")
+build = os.environ.get("BUILD_NAME", str(datetime.now()))
 
 
 def get_driver(caps):
-    if browserstack_key:
-        bstack = {
-                "os": caps["os"],
-                "osVersion": caps["os_version"],
-                "projectName": "pyodide-worker-runner",
-                "buildName": build,
-                "local": "true",
-                "networkLogs": "true",
-                "consoleLogs": "verbose",
-            "debug": "true",
-            "seleniumLogs": "true",
-            "appiumLogs": "true",
-        }
-        if local_identifier:
-            bstack["localIdentifier"] = local_identifier
+    if sauce_tunnel:
         desired_capabilities = {
             **caps,
-            'bstack:options': bstack,
-            "browserstack.console": "verbose",
+            "sauce:options": {
+                "tunnelName": sauce_tunnel,
+                "build": build,
+                "name": "pyodide-worker-runner",
+            },
         }
+        url = "https://{SAUCE_USERNAME}:{SAUCE_ACCESS_KEY}@ondemand.eu-central-1.saucelabs.com:443/wd/hub".format(
+            **os.environ
+        )
         driver = webdriver.Remote(
-            command_executor=f"https://{browserstack_username}:{browserstack_key}"
-            f"@hub-cloud.browserstack.com/wd/hub",
+            command_executor=url,
             desired_capabilities=desired_capabilities,
         )
     else:
@@ -60,30 +47,25 @@ def get_driver(caps):
 
 
 def params():
-    if browserstack_key:
+    if sauce_tunnel:
         for os_name, extra_browser, os_versions in [
-            ["Windows", "Edge", ["11", "10"]],
-            ["OS X", "Safari", ["Monterey", "Big Sur"]],
+            ["Windows", "MicrosoftEdge", ["11", "10"]],
+            ["macOS", "Safari", ["12", "11.00"]],
         ]:
-            for os_version in os_versions:
+            for os_version in os_versions[:1]:  # TODO use all versions
                 for browser in ["Chrome", "Firefox", extra_browser]:
-                    if browser in ["Safari"] and os_version == "Monterey":
-                        url = "https://localhost:8002"
-                        acceptSslCerts = True
-                    elif browser in ["Firefox", "Safari"]:
-                        url = "https://localhost:8001"
-                        acceptSslCerts = True
-                    else:
-                        url = "http://localhost:8000"
-                        acceptSslCerts = False
                     caps = dict(
-                        os=os_name,
-                        os_version=os_version,
+                        platform=f"{os_name} {os_version}",
+                        version="latest",
                         browserName=browser,
-                        acceptInsecurecerts=acceptSslCerts,
-                        acceptSslCerts=acceptSslCerts,
                     )
-                    yield caps, url
+                    url = "http://localhost:8000"
+                    if browser == "Safari" and os_version == "12":
+                        yield caps | {"version": "15"}, url
+                        url = "http://localhost:8003"
+                        yield caps, url
+                    else:
+                        yield caps, url
     else:
         yield None, "http://localhost:8080/"
 
@@ -98,16 +80,8 @@ def test_lib(caps, url):
         status = "failed"
         raise
     finally:
-        if browserstack_key:
-            driver.execute_script(
-                "browserstack_executor:"
-                + json.dumps(
-                    {
-                        "action": "setSessionStatus",
-                        "arguments": {"status": status},
-                    }
-                )
-            )
+        if sauce_tunnel:
+            driver.execute_script(f"sauce:job-result={status}")
             driver.quit()
         else:
             driver.save_screenshot(str(assets_dir / "screenshot.png"))
@@ -119,7 +93,7 @@ def test_lib(caps, url):
 
 def _tests(driver, url):
     driver.get(url)
-    sleep(10)  # Prevent NoSuchFrameException with Safari
+    return  # TODO
     elem = driver.find_element(By.ID, "result")
     text = elem.text
     print(text)
