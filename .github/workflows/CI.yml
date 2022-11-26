@@ -42,6 +42,7 @@ jobs:
             username: ${{ secrets.SAUCE_USERNAME }}
             accessKey: ${{ secrets.SAUCE_ACCESS_KEY }}
             tunnelName: github-action-tunnel
+            region: eu-central
       - name: Test
         env:
           SAUCE_TUNNEL: github-action-tunnel
