@@ -1,6 +1,6 @@
 import os
 import ssl
-from http.server import SimpleHTTPRequestHandler, HTTPServer
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from functools import partial
 
 
@@ -12,7 +12,7 @@ class MyHTTPRequestHandler(SimpleHTTPRequestHandler):
         super().end_headers()
 
 
-server = HTTPServer(
+server = ThreadingHTTPServer(
     ("localhost", int(os.environ.get("TEST_SERVER_PORT", 8000))),
     partial(MyHTTPRequestHandler, directory="dist"),
 )
