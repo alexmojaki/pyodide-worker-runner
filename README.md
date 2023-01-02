@@ -60,13 +60,13 @@ Comlink.expose({
 The `comsync` integration is best used in combination with the [`python_runner`](https://github.com/alexmojaki/python_runner) Python library so that you don't have to call the methods on `SyncExtras` yourself.
 
 1. Make sure `python_runner` is installed within Pyodide, ideally in advance by including it in the archive loaded by `loadPyodideAndPackage`.
-2. Use the `python_runner.PyodideRunner` class, which has patches for `builtins.input`, `sys.stdin.readline`, and `time.sleep` specifically for use with this library and `comsync`. This will handle blocking synchronously, reading input, and raising `KeyboardInterrupt` when reading/sleeping is interrupted from the main thread without relying on `pyodide.setInterruptBuffer`.
+2. Use the `python_runner.PyodideRunner` class, which has patches for `builtins.input`, `sys.stdin`, and `time.sleep` specifically for use with this library and `comsync`. This will handle blocking synchronously, reading input, and raising `KeyboardInterrupt` when reading/sleeping is interrupted from the main thread without relying on `pyodide.setInterruptBuffer`.
 3. Call the `makeRunnerCallback(syncExtras, callbacks)` function from this library. `callbacks` should be an object containing callback functions to handle the different event types:
    - `output`: Required. Called with an array of output parts, e.g. `[{type: "stdout", text: "Hello world"}]`. Use this to tell your UI to display the output.
    - `input`: Optional. Called when the Python code reads from `sys.stdin`, e.g. with `input()`. Use this to tell your UI to wait for the user to enter some text. The entered text should be passed to `PyodideClient.writeMessage()` in the main thread, and will be returned synchronously by this function to the Python code. When the Python code calls `input(prompt)`, the string `prompt` is passed to this callback. Two types of output part will also be passed to the `output` callback:
-        - `input_prompt`: the prompt passed to the `input()` function. Using this output part may be a better way to display the prompt in the UI than the argument of the `input` callback, but the `input` callback is still needed even if it doesn't display the prompt.
+        - `input_prompt`: the prompt passed to the `input()` function. Using this output part may be a better way to display the prompt in the UI rather than using the argument of the `input` callback, but the `input` callback is still needed even if it doesn't display the prompt.
         - `input`: the user's input passed to stdin. Not actually 'output', but included as an output part because it's typically shown in regular Python consoles.
-   - `other`: Optional. Called for all other event types, except `sleep` which is handled directly here.
+   - `other`: Optional. Called for all other event types (except `sleep` which is handled directly by `makeRunnerCallback`). Receives the same two arguments (event type and data) that are passed to `runner.callback()` in Python.
 4. `makeRunnerCallback` returns a single callback function which can be passed to `runner.set_callback`.
 
 ## Automatically install imported packages with micropip

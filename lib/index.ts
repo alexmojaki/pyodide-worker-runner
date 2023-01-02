@@ -198,7 +198,8 @@ export interface RunnerCallbacks {
  *              - `input`: the user's input passed to stdin.
  *                Not actually 'output', but included as an output part
  *                because it's typically shown in regular Python consoles.
- *      - `other`: Optional. Called for all other event types, except `sleep` which is handled directly here.
+ *      - `other`: Optional. Called for all other event types
+ *        (except `sleep` which is handled directly by `makeRunnerCallback`).
  *        The actual event type is passed as the first argument.
  */
 export function makeRunnerCallback(
