@@ -76,3 +76,7 @@ Pyodide provides [`loadPackagesFromImports`](https://pyodide.org/en/stable/usage
 ```js
 await pyodide.pyimport("pyodide_worker_runner").install_imports(python_source_code_string);
 ```
+
+The first argument is a string of Python source code or a list of module names being imported.
+You can also provide an optional `message_callback` argument is provided to get info about packages as they load.
+See the docstring for more details.
