@@ -229,7 +229,7 @@ export interface PyodideExtras extends SyncExtras {
 }
 
 /**
- * Call this in your web worker code with an object `func`
+ * Call this in your web worker code with a function `func`
  * to allow it to be called from the main thread by `PyodideClient.call`.
  *
  * `func` will be called with an object `extras` of type `PyodideExtras` as its first argument.
@@ -237,7 +237,7 @@ export interface PyodideExtras extends SyncExtras {
  * and the return value is passed back to the main thread and returned from `PyodideClient.call`.
  *
  * `func` will be wrapped into a new function which is returned here.
- * The returned function should passed to `Comlink.expose`, possibly as part of a larger object.
+ * The returned function should be passed to `Comlink.expose`, possibly as part of a larger object.
  *
  * For example, the worker code may look something like this:
  *
