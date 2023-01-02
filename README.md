@@ -32,6 +32,22 @@ If you don't use `loadPyodideAndPackage` and just load Pyodide yourself, then we
 
 Loading of both Pyodide and the package is retried up to 3 times in case of network errors.
 
+## Automatic reloading after fatal errors
+
+Sometimes Pyodide encounters a fatal error from which it cannot recover, after which the module cannot be reused.
+To deal with this, this package provides a class `PyodideFatalErrorReloader`. The constructor accepts a 'loader' function which should return a promise that resolves to a Pyodide module. We recommend a function which calls `loadPyodideAndPackage`. Then code that uses the Pyodide module should be wrapped in a `withPyodide` call. Here's an example:
+
+```js
+import {loadPyodideAndPackage, PyodideFatalErrorReloader} from "pyodide-worker-runner";
+
+const reloader = new PyodideFatalErrorReloader(() => loadPyodideAndPackage({ url: "package.tar.gz" }));
+await reloader.withPyodide(async (pyodide) => {
+  pyodide.runCode(...);
+});
+```
+
+If a fatal error occurs, the loader function will be called again immediately to reload Pyodide in the background, while the error is rethrown for you to handle. The next call to `withPyodide` will then be able to use the new Pyodide instance.
+
 ## `comsync` integration
 
 This library builds on [`comsync`](https://github.com/alexmojaki/comsync) to help with interrupting running code and synchronously sleeping and reading from stdin.
