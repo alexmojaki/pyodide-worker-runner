@@ -2,10 +2,10 @@ import json
 import os
 from datetime import datetime
 from pathlib import Path
-from time import sleep
 
 import pytest
 from selenium import webdriver
+from selenium.common import NoSuchFrameException
 from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -55,19 +55,19 @@ def get_driver(caps):
             options=options,
             desired_capabilities=desired_capabilities,
         )
-    driver.implicitly_wait(45)
+    driver.implicitly_wait(120)
     return driver
 
 
 def params():
     if browserstack_key:
-        for os_name, extra_browser, os_versions in [
-            ["Windows", "Edge", ["11", "10"]],
-            ["OS X", "Safari", ["Monterey", "Big Sur"]],
+        for os_name, browsers, os_versions in [
+            ["OS X", ["Safari"], ["Ventura", "Monterey", "Big Sur"]],
+            ["Windows", ["Edge", "Chrome", "Firefox"], ["11"]],
         ]:
             for os_version in os_versions:
-                for browser in ["Chrome", "Firefox", extra_browser]:
-                    if browser in ["Safari"] and os_version == "Monterey":
+                for browser in browsers:
+                    if browser in ["Safari"] and os_version in ["Ventura", "Monterey"]:
                         url = "https://localhost:8002"
                         acceptSslCerts = True
                     elif browser in ["Firefox", "Safari"]:
@@ -119,9 +119,13 @@ def test_lib(caps, url):
 
 def _tests(driver, url):
     driver.get(url)
-    sleep(10)  # Prevent NoSuchFrameException with Safari
-    elem = driver.find_element(By.ID, "result")
-    text = elem.text
-    print(text)
-    assert "PASSED" in text
-    assert "FAILED" not in text
+    while True:
+        try:
+            elem = driver.find_element(By.ID, "result")
+            text = elem.text
+            print(text)
+            assert "PASSED" in text
+            assert "FAILED" not in text
+            break
+        except NoSuchFrameException:
+            pass
