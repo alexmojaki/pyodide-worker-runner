@@ -10,4 +10,4 @@ sleep 3
 curl -k http://localhost:8000
 curl -k http://localhost:8003
 
-pytest --tests-per-worker 2 test.py
+pytest --tests-per-worker 5 test.py
