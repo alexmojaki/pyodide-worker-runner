@@ -3175,10 +3175,10 @@ punycode@^2.1.0:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.1.1.tgz#b58b010ac40c22c5657616c8d2c2c02c7bf479ec"
   integrity sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==
 
-pyodide@^0.22.1:
-  version "0.22.1"
-  resolved "https://registry.yarnpkg.com/pyodide/-/pyodide-0.22.1.tgz#45bfab36ef332ec7fed6fb9736ab13ebd54f05d1"
-  integrity sha512-6+PkFLTC+kcBKtFQxYBxR44J5IBxLm8UGkobLgZv1SxzV9qOU2rb0YYf0qDtlnfDiN/IQd2uckf+D8Zwe88Mqg==
+pyodide@^0.23.2:
+  version "0.23.2"
+  resolved "https://registry.yarnpkg.com/pyodide/-/pyodide-0.23.2.tgz#c988719daac6a719576f0c07fe795b1e86d225ff"
+  integrity sha512-GK4YDZVgzfAXK/7X0IiCI+142k0Ah/HwYTzDHtG8zC47dflWYuPozeFbOngShuL1M9Un5sCmHFqiH3boxJv0pQ==
   dependencies:
     base-64 "^1.0.0"
     node-fetch "^2.6.1"
