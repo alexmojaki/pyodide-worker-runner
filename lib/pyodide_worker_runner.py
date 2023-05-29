@@ -2,7 +2,11 @@ import importlib
 import sys
 from typing import Callable, Literal, Union, TypedDict
 
-import pyodide  # noqa
+try:
+    from pyodide.code import find_imports  # noqa
+except ImportError:
+    from pyodide import find_imports  # noqa
+
 import pyodide_js  # noqa
 
 sys.setrecursionlimit(400)
@@ -76,7 +80,7 @@ async def install_imports(
     """
     if isinstance(source_code_or_imports, str):
         try:
-            imports: list[str] = pyodide.find_imports(source_code_or_imports)
+            imports: list[str] = find_imports(source_code_or_imports)
         except SyntaxError:
             return
     else:
