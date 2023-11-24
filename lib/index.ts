@@ -79,7 +79,7 @@ export function versionInfo(version: string): number[] {
 export async function loadPyodideAndPackage(
   packageOptions: PackageOptions,
   pyodideLoader: PyodideLoader = defaultPyodideLoader,
-) {
+) : Promise<PyodideInterface> {
   let {format, extractDir, url} = packageOptions;
   extractDir = extractDir || "/tmp/";
 
