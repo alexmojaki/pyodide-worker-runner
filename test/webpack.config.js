@@ -29,7 +29,7 @@ module.exports = {
   },
   resolve: {
     extensions: [".ts", ".js", ".d.ts"],
-    fallback: {url: require.resolve("url"),},
+    fallback: {url: false},
   },
   devtool: "inline-source-map",
 };
