@@ -17,7 +17,6 @@ build = os.environ.get("BUILD_NAME", str(datetime.now()))
 
 def get_driver(caps):
     if sauce_tunnel:
-        options = webdriver.ChromeOptions()
         desired_capabilities = {
             **caps,
             "sauce:options": {
@@ -29,19 +28,19 @@ def get_driver(caps):
         url = "https://{SAUCE_USERNAME}:{SAUCE_ACCESS_KEY}@ondemand.eu-central-1.saucelabs.com:443/wd/hub".format(
             **os.environ
         )
-        options.default_capabilities = desired_capabilities
         driver = webdriver.Remote(
             command_executor=url,
-            options=options,
+            desired_capabilities=desired_capabilities,
         )
-        # driver.desired_capabilities = desired_capabilities
     else:
-        options = webdriver.ChromeOptions()
+        options = Options()
         options.add_argument("--headless")
         options.add_argument("--disable-gpu")
-        # options["goog:loggingPrefs"] = {"browser": "ALL"}
+        desired_capabilities = DesiredCapabilities.CHROME
+        desired_capabilities["goog:loggingPrefs"] = {"browser": "ALL"}
         driver = webdriver.Chrome(
             options=options,
+            desired_capabilities=desired_capabilities,
         )
     driver.implicitly_wait(45)
     return driver
