@@ -30,20 +30,17 @@ def get_driver(caps):
         )
         driver = webdriver.Remote(
             command_executor=url,
-            # desired_capabilities=desired_capabilities,
+            options=desired_capabilities,
         )
-        driver.desired_capabilities = desired_capabilities
+        # driver.desired_capabilities = desired_capabilities
     else:
-        options = Options()
+        options = webdriver.ChromeOptions()
         options.add_argument("--headless")
         options.add_argument("--disable-gpu")
-        desired_capabilities = DesiredCapabilities.CHROME
-        desired_capabilities["goog:loggingPrefs"] = {"browser": "ALL"}
+        # options["goog:loggingPrefs"] = {"browser": "ALL"}
         driver = webdriver.Chrome(
             options=options,
-            # desired_capabilities=desired_capabilities,
         )
-        driver.desired_capabilities =desired_capabilities
     driver.implicitly_wait(45)
     return driver
 
