@@ -17,6 +17,7 @@ build = os.environ.get("BUILD_NAME", str(datetime.now()))
 
 def get_driver(caps):
     if sauce_tunnel:
+        options = webdriver.ChromeOptions()
         desired_capabilities = {
             **caps,
             "sauce:options": {
@@ -28,9 +29,10 @@ def get_driver(caps):
         url = "https://{SAUCE_USERNAME}:{SAUCE_ACCESS_KEY}@ondemand.eu-central-1.saucelabs.com:443/wd/hub".format(
             **os.environ
         )
+        options.default_capabilities = desired_capabilities
         driver = webdriver.Remote(
             command_executor=url,
-            options=desired_capabilities,
+            options=options,
         )
         # driver.desired_capabilities = desired_capabilities
     else:
