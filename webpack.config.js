@@ -1,4 +1,5 @@
 const path = require("path");
+const { PyodidePlugin } = require("@pyodide/webpack-plugin");
 
 module.exports = {
   entry: "./lib/index.ts",
@@ -19,6 +20,7 @@ module.exports = {
       },
     ],
   },
+  plugins: [new PyodidePlugin()],
   resolve: {
     extensions: [".ts", ".js", ".d.ts"],
     fallback: {url: false},

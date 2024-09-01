@@ -1,4 +1,5 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { PyodidePlugin } = require("@pyodide/webpack-plugin");
 
 module.exports = {
   mode: "development",
@@ -17,7 +18,7 @@ module.exports = {
     path: __dirname + "/dist",
     filename: "[name].js",
   },
-  plugins: [new HtmlWebpackPlugin({excludeChunks: ["sw"]})],
+  plugins: [new HtmlWebpackPlugin({excludeChunks: ["sw"]}), new PyodidePlugin()],
   module: {
     rules: [
       {
