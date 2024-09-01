@@ -4,7 +4,11 @@ from pathlib import Path
 
 import pytest
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.options import ArgOptions
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.safari.options import Options as SafariOptions
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.edge.options import Options as EdgeOptions
 from selenium.webdriver.common.by import By
 
 assets_dir = Path(__file__).parent / "test_assets"
@@ -14,25 +18,23 @@ sauce_tunnel = os.environ.get("SAUCE_TUNNEL")
 build = os.environ.get("BUILD_NAME", str(datetime.now()))
 
 
-def get_driver(caps):
+def get_driver(options: ArgOptions):
     if sauce_tunnel:
-        desired_capabilities = {
-            **caps,
-            "sauce:options": {
-                "tunnelName": sauce_tunnel,
-                "build": build,
-                "name": "pyodide-worker-runner",
-            },
-        }
+        options.set_capability("sauce:options", {
+            "tunnelName": sauce_tunnel,
+            "build": build,
+            "name": "pyodide-worker-runner",
+        })
+
         url = "https://{SAUCE_USERNAME}:{SAUCE_ACCESS_KEY}@ondemand.eu-central-1.saucelabs.com:443/wd/hub".format(
             **os.environ
         )
         driver = webdriver.Remote(
             command_executor=url,
-            desired_capabilities=desired_capabilities,
+            options=options,
         )
     else:
-        options = Options()
+        options = ChromeOptions()
         options.add_argument("--headless")
         options.add_argument("--disable-gpu")
         options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
@@ -45,22 +47,20 @@ def params():
     if sauce_tunnel:
         for os_name, extra_browser, os_versions in [
             ["Windows", "MicrosoftEdge", ["11", "10"]],
-            ["macOS", "Safari", ["12", "11.00"]],
+            ["macOS", "Safari", ["13", "12"]],
         ]:
             for os_version in os_versions:
                 for browser in ["Chrome", "Firefox", extra_browser]:
-                    caps = dict(
-                        platform=f"{os_name} {os_version}",
-                        version="latest",
-                        browserName=browser,
-                    )
+                    options: ArgOptions = {
+                        "Chrome": ChromeOptions,
+                        "Firefox": FirefoxOptions,
+                        "Safari": SafariOptions,
+                        "MicrosoftEdge": EdgeOptions,
+                    }[browser]()
+                    options.browser_version = "latest"
+                    options.platform_name = f"{os_name} {os_version}"
                     url = "http://localhost:8000"
-                    if browser == "Safari" and os_version == "12":
-                        yield caps | {"version": "15"}, url
-                        url = "http://localhost:8003"
-                        yield caps, url
-                    else:
-                        yield caps, url
+                    yield options, url
     else:
         yield None, "http://localhost:8000/"
 
