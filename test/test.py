@@ -39,7 +39,7 @@ def get_driver(options: ArgOptions):
         options.add_argument("--disable-gpu")
         options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
         driver = webdriver.Chrome(options=options)
-    driver.implicitly_wait(45)
+    driver.implicitly_wait(60)
     return driver
 
 
