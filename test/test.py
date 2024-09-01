@@ -4,7 +4,6 @@ from pathlib import Path
 
 import pytest
 from selenium import webdriver
-from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 
@@ -36,12 +35,8 @@ def get_driver(caps):
         options = Options()
         options.add_argument("--headless")
         options.add_argument("--disable-gpu")
-        desired_capabilities = DesiredCapabilities.CHROME
-        desired_capabilities["goog:loggingPrefs"] = {"browser": "ALL"}
-        driver = webdriver.Chrome(
-            options=options,
-            desired_capabilities=desired_capabilities,
-        )
+        options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
+        driver = webdriver.Chrome(options=options)
     driver.implicitly_wait(45)
     return driver
 
@@ -67,7 +62,7 @@ def params():
                     else:
                         yield caps, url
     else:
-        yield None, "http://localhost:8080/"
+        yield None, "http://localhost:8000/"
 
 
 @pytest.mark.parametrize("caps,url", list(params()))
