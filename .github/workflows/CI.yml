@@ -50,7 +50,7 @@ jobs:
           SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
           BUILD_NAME: ${{ github.event.head_commit.message }}
         run: |
-          pip install pytest pytest-parallel py selenium!=4.4.1
+          pip install pytest pytest-xdist py selenium!=4.4.1
           cd test
           ./package.sh
           ./test.sh
